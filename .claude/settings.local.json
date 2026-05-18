@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "PowerShell(*)",
+      "Bash(*)",
+      "PowerShell(ls \"$env:USERPROFILE\\\\.claude\\\\\" -Force | Select-Object Mode, Name)",
+      "PowerShell(Get-ChildItem \"$env:USERPROFILE\\\\.claude\" -Force | Select-Object Mode, Name)",
+      "PowerShell(Test-Path \"$env:USERPROFILE\\\\.claude\"; $env:USERPROFILE)",
+      "Bash(ls \"/c/Users/zhouyijin/.claude/\" 2>&1)",
+      "Read(//c/Users/zhouyijin/.claude//**)",
+      "Bash(mkdir -p /c/Users/zhouyijin/.claude/commands /c/Users/zhouyijin/.claude/agents /c/Users/zhouyijin/.claude/skills/sdd-init && echo \"dirs ok\")",
+      "Bash([ -e \"$DEST/$f\" ])",
+      "Bash(cp /f/workspace/ai/codetrace/docs/agents/__TRACKED_VAR__ /c/Users/zhouyijin/.claude/agents/__TRACKED_VAR__)",
+      "Bash([ -e \"$DEST\" ])",
+      "Bash(cp /f/workspace/ai/codetrace/docs/commands/sdd-starter.md /c/Users/zhouyijin/.claude/commands/sdd-starter.md)"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\zhouyijin\\.claude"
+    ]
+  }
+}
