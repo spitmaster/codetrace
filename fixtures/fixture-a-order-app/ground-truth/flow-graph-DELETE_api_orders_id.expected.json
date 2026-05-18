@@ -1,0 +1,250 @@
+{
+  "_comment": "Ground-truth FlowGraph for DELETE /api/orders/:id (cancel a pending order, restore stock atomically). Used by dataflow-tracer regression. Main-path recall target ≥ 80%: requireUser → handler → cancelOrder → tx.order.findFirst → restoreStock → tx.product.update(increment) → tx.order.update(status='cancelled') → Order/OrderItem/Product tables.",
+  "_evidenceSource": "fixtures/fixture-a-order-app/backend/src/{routes/orders,services/order-service,services/inventory-service,lib/auth}.ts (commit cb14140 of feature/codeviz-m1)",
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:DELETE:/api/orders/:id",
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "input",
+      "label": "request",
+      "depth": 0,
+      "metadata": {
+        "headers": ["x-user-id"],
+        "pathParams": ["id"]
+      }
+    },
+    {
+      "id": "n2",
+      "kind": "function",
+      "label": "requireUser",
+      "symbolId": "ts:src/lib/auth.ts#requireUser",
+      "depth": 1,
+      "metadata": { "role": "middleware" }
+    },
+    {
+      "id": "n3",
+      "kind": "function",
+      "label": "DELETE /api/orders/:id handler",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "depth": 1
+    },
+    {
+      "id": "n4",
+      "kind": "function",
+      "label": "cancelOrder",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "depth": 2,
+      "metadata": { "role": "service", "transactional": true }
+    },
+    {
+      "id": "n5",
+      "kind": "function",
+      "label": "tx.order.findFirst (with items)",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.order.findFirst",
+        "site": { "file": "src/services/order-service.ts", "line": 113 },
+        "purpose": "ownership lookup + load items[] for restoreStock",
+        "businessRule": "where:{id, userId} ownership; status !== 'pending' rejected with ConflictError"
+      }
+    },
+    {
+      "id": "n6",
+      "kind": "function",
+      "label": "restoreStock",
+      "symbolId": "ts:src/services/inventory-service.ts#restoreStock",
+      "depth": 3,
+      "metadata": { "role": "service", "txScoped": true }
+    },
+    {
+      "id": "n7",
+      "kind": "function",
+      "label": "tx.product.update (increment stock)",
+      "symbolId": "ts:src/services/inventory-service.ts#restoreStock",
+      "depth": 4,
+      "metadata": {
+        "ormCall": "prisma.product.update",
+        "site": { "file": "src/services/inventory-service.ts", "line": 79 },
+        "purpose": "stock increment — reverses reserveStock on cancel",
+        "businessRule": "no upper bound on stock; idempotency guarded at order-status level, not here"
+      }
+    },
+    {
+      "id": "n8",
+      "kind": "function",
+      "label": "tx.order.update (status=cancelled)",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.order.update",
+        "site": { "file": "src/services/order-service.ts", "line": 131 },
+        "purpose": "state machine transition pending → cancelled"
+      }
+    },
+    {
+      "id": "n9",
+      "kind": "table",
+      "label": "Order table",
+      "depth": 4,
+      "metadata": { "model": "Order", "schemaFile": "prisma/schema.prisma:41-52" }
+    },
+    {
+      "id": "n10",
+      "kind": "table",
+      "label": "OrderItem table",
+      "depth": 4,
+      "metadata": {
+        "model": "OrderItem",
+        "schemaFile": "prisma/schema.prisma:57-68",
+        "via": "include:{items:true} on Order findFirst — items are read-only here"
+      }
+    },
+    {
+      "id": "n11",
+      "kind": "table",
+      "label": "Product table",
+      "depth": 5,
+      "metadata": { "model": "Product", "schemaFile": "prisma/schema.prisma:28-36" }
+    },
+    {
+      "id": "n12",
+      "kind": "response",
+      "label": "200 { orderId, status: 'cancelled' }",
+      "depth": 2,
+      "metadata": {
+        "httpStatus": 200,
+        "shape": { "orderId": "string", "status": "\"cancelled\"" }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "n1",
+      "to": "n2",
+      "kind": "input-bind",
+      "confidence": "high",
+      "metadata": { "site": "express middleware chain in src/routes/orders.ts:64" }
+    },
+    {
+      "id": "e2",
+      "from": "n2",
+      "to": "n3",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": "express next() in src/lib/auth.ts:23" }
+    },
+    {
+      "id": "e3",
+      "from": "n3",
+      "to": "n4",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/routes/orders.ts", "line": 67 } }
+    },
+    {
+      "id": "e4",
+      "from": "n4",
+      "to": "n5",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": { "file": "src/services/order-service.ts", "line": 113 },
+        "txWrapper": "prisma.$transaction at line 112"
+      }
+    },
+    {
+      "id": "e5",
+      "from": "n5",
+      "to": "n9",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "Order",
+        "where": "{ id: orderId, userId }",
+        "businessRule": "ownership check folded into where-clause"
+      }
+    },
+    {
+      "id": "e6",
+      "from": "n5",
+      "to": "n10",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "OrderItem",
+        "via": "include:{items:true}",
+        "joinFrom": "Order",
+        "purpose": "need item.productId + item.quantity for restoreStock"
+      }
+    },
+    {
+      "id": "e7",
+      "from": "n4",
+      "to": "n6",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 126 } }
+    },
+    {
+      "id": "e8",
+      "from": "n6",
+      "to": "n7",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": { "file": "src/services/inventory-service.ts", "line": 79 },
+        "loop": "per item in order.items[]"
+      }
+    },
+    {
+      "id": "e9",
+      "from": "n7",
+      "to": "n11",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": { "target": "Product", "operation": "stock increment" }
+    },
+    {
+      "id": "e10",
+      "from": "n4",
+      "to": "n8",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 131 } }
+    },
+    {
+      "id": "e11",
+      "from": "n8",
+      "to": "n9",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": {
+        "target": "Order",
+        "operation": "update",
+        "fields": ["status"],
+        "stateTransition": "pending → cancelled"
+      }
+    },
+    {
+      "id": "e12",
+      "from": "n4",
+      "to": "n12",
+      "kind": "return",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 135 } }
+    },
+    {
+      "id": "e13",
+      "from": "n3",
+      "to": "n12",
+      "kind": "return",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/routes/orders.ts", "line": 68 }, "httpStatus": 200 }
+    }
+  ],
+  "cycles": [],
+  "truncations": []
+}

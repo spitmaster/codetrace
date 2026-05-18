@@ -1,0 +1,131 @@
+{
+  "_comment": "Ground-truth BusinessAnnotations for GET /api/orders/:id. Used by business-translator regression. Pass criterion: narrativeConfidence=high AND ≥ 80% of nodeAnnotations match (by businessLabel synonyms acceptable) AND every annotation has non-empty evidence (anti-fabrication red line).",
+  "_evidenceSource": "fixtures/fixture-a-order-app/backend/README.md §4 GET /api/orders/:id + src/services/order-service.ts:89-105 (commit cb14140 of feature/codeviz-m1)",
+  "_redLine": "Per codeviz-overview red line #2: evidence may not be empty. If the translator outputs an annotation without any evidence, fail the regression even if the label is correct.",
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:GET:/api/orders/:id",
+  "narrative": "当前用户带着 x-user-id 调用 GET /api/orders/:id,系统校验身份后查询订单详情:用 where:{ id, userId } 同时做存在性检查与归属校验(不属于当前用户的订单视同不存在,直接 404,以免向非所有者泄漏订单存在),并通过 Prisma 的 include 一次性把订单行 OrderItem 以及每行所关联的商品摘要(id/name/price)展开返回。",
+  "narrativeConfidence": "high",
+  "narrativeEvidence": [
+    "src/routes/orders.ts:48-59 (GET /:id 路由 + requireUser 中间件 + 调用 getOrderDetail)",
+    "src/services/order-service.ts:89-105 (where:{id, userId} 双重条件 + include 嵌套关联展开)",
+    "backend/README.md §3.3 订单详情:仅当 order.userId === x-user-id 时返回,否则一律 404",
+    "backend/README.md §4 GET /api/orders/:id 业务意图清单"
+  ],
+  "nodeAnnotations": [
+    {
+      "nodeId": "n2",
+      "businessLabel": "鉴权(取 x-user-id)",
+      "businessDescription": "从请求 header 中读取 x-user-id 当作买家身份;header 缺失即返回 401",
+      "confidence": "high",
+      "evidence": [
+        "src/lib/auth.ts:18 const userId = req.header(\"x-user-id\")",
+        "src/lib/auth.ts:19-21 抛 UnauthorizedError"
+      ]
+    },
+    {
+      "nodeId": "n3",
+      "businessLabel": "订单详情接口入口",
+      "businessDescription": "GET /api/orders/:id 路由,从 path 取 id,调用 getOrderDetail 后 res.json 返回",
+      "confidence": "high",
+      "evidence": [
+        "src/routes/orders.ts:48 ordersRouter.get(\"/:id\", requireUser, ...)",
+        "src/routes/orders.ts:53 调用 getOrderDetail(req.userId, req.params.id)",
+        "src/routes/orders.ts:54 res.json(order)"
+      ]
+    },
+    {
+      "nodeId": "n4",
+      "businessLabel": "查询订单详情(校验归属 + 关联展开)",
+      "businessDescription": "用 where:{id, userId} 同时做存在 + 归属检查;findFirst 没拿到就抛 NotFoundError;include 嵌套展开订单行与商品摘要",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:89-105 getOrderDetail 函数主体",
+        "src/services/order-service.ts:101-103 if (!order) throw new NotFoundError",
+        "backend/README.md §4 GET /api/orders/:id evidence 锚点:where:{ id, userId } 同时条件、include:{ items: { include: { product } } }"
+      ]
+    },
+    {
+      "nodeId": "n5",
+      "businessLabel": "按归属取订单与关联",
+      "businessDescription": "Prisma findFirst,关键是 where 用复合条件做归属校验、include 一次嵌入 items 与 product",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:90-99 prisma.order.findFirst({ where: { id, userId }, include: { items: { include: { product: { select: ... } } } } })"
+      ]
+    },
+    {
+      "nodeId": "n6",
+      "businessLabel": "订单表",
+      "businessDescription": "订单头表,本链路只读;where 同时校验 id 与 userId 归属",
+      "confidence": "high",
+      "evidence": [
+        "prisma/schema.prisma:41-52 model Order"
+      ]
+    },
+    {
+      "nodeId": "n7",
+      "businessLabel": "订单行表(关联展开)",
+      "businessDescription": "通过 include:{items:...} 关系展开,本链路只读",
+      "confidence": "high",
+      "evidence": [
+        "prisma/schema.prisma:57-68 model OrderItem",
+        "prisma/schema.prisma:64 OrderItem.order 关联到 Order(onDelete: Cascade)"
+      ]
+    },
+    {
+      "nodeId": "n8",
+      "businessLabel": "商品摘要(只取 id/name/price)",
+      "businessDescription": "嵌套 include 出 Product,但只 select 三个字段,避免暴露 stock 等管理字段",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:95 select: { id: true, name: true, price: true }",
+        "prisma/schema.prisma:28-36 model Product"
+      ]
+    },
+    {
+      "nodeId": "n9",
+      "businessLabel": "返回订单详情",
+      "businessDescription": "成功返回 Order 头 + 完整 items + 每个 item 的 product 摘要,HTTP 200;归属失败一律 404",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:104 return order",
+        "src/routes/orders.ts:54 res.json(order)"
+      ]
+    }
+  ],
+  "edgeAnnotations": [
+    {
+      "edgeId": "e5",
+      "businessLabel": "读订单(归属校验)",
+      "confidence": "high",
+      "evidence": [
+        "prisma.order.findFirst with where:{id, userId} at src/services/order-service.ts:90-99"
+      ]
+    },
+    {
+      "edgeId": "e6",
+      "businessLabel": "关联展开订单行",
+      "confidence": "high",
+      "evidence": [
+        "include:{items: { include: { product: ... } }} at src/services/order-service.ts:92-98"
+      ]
+    },
+    {
+      "edgeId": "e7",
+      "businessLabel": "关联展开商品摘要",
+      "confidence": "high",
+      "evidence": [
+        "select:{id, name, price} on product at src/services/order-service.ts:95"
+      ]
+    },
+    {
+      "edgeId": "e9",
+      "businessLabel": "返回客户端 200",
+      "confidence": "high",
+      "evidence": [
+        "res.json(order) at src/routes/orders.ts:54"
+      ]
+    }
+  ]
+}

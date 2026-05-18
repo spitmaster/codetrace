@@ -1,0 +1,182 @@
+{
+  "_comment": "Ground-truth FlowGraph for GET /api/orders/:id (order detail with items + product expansion). Used by dataflow-tracer regression. Main-path recall target ≥ 80%: requireUser → handler → getOrderDetail → prisma.order.findFirst (with where:{id,userId} ownership + include:{items:{include:{product}}}) → Order/OrderItem/Product tables.",
+  "_evidenceSource": "fixtures/fixture-a-order-app/backend/src/{routes/orders,services/order-service,lib/auth}.ts (commit cb14140 of feature/codeviz-m1)",
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:GET:/api/orders/:id",
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "input",
+      "label": "request",
+      "depth": 0,
+      "metadata": {
+        "headers": ["x-user-id"],
+        "pathParams": ["id"]
+      }
+    },
+    {
+      "id": "n2",
+      "kind": "function",
+      "label": "requireUser",
+      "symbolId": "ts:src/lib/auth.ts#requireUser",
+      "depth": 1,
+      "metadata": { "role": "middleware" }
+    },
+    {
+      "id": "n3",
+      "kind": "function",
+      "label": "GET /api/orders/:id handler",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "depth": 1
+    },
+    {
+      "id": "n4",
+      "kind": "function",
+      "label": "getOrderDetail",
+      "symbolId": "ts:src/services/order-service.ts#getOrderDetail",
+      "depth": 2,
+      "metadata": { "role": "service" }
+    },
+    {
+      "id": "n5",
+      "kind": "function",
+      "label": "prisma.order.findFirst",
+      "symbolId": "ts:src/services/order-service.ts#getOrderDetail",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.order.findFirst",
+        "site": { "file": "src/services/order-service.ts", "line": 90 },
+        "purpose": "ownership-scoped lookup + relation expansion (items → product)",
+        "businessRule": "where:{id, userId} doubles as ownership guard — non-owner sees 404, not 403, to avoid leaking existence"
+      }
+    },
+    {
+      "id": "n6",
+      "kind": "table",
+      "label": "Order table",
+      "depth": 4,
+      "metadata": { "model": "Order", "schemaFile": "prisma/schema.prisma:41-52" }
+    },
+    {
+      "id": "n7",
+      "kind": "table",
+      "label": "OrderItem table",
+      "depth": 4,
+      "metadata": {
+        "model": "OrderItem",
+        "schemaFile": "prisma/schema.prisma:57-68",
+        "via": "include:{items:...} relation expansion from Order"
+      }
+    },
+    {
+      "id": "n8",
+      "kind": "table",
+      "label": "Product table",
+      "depth": 4,
+      "metadata": {
+        "model": "Product",
+        "schemaFile": "prisma/schema.prisma:28-36",
+        "via": "nested include:{product:{select:{id,name,price}}} from OrderItem",
+        "selectedFields": ["id", "name", "price"]
+      }
+    },
+    {
+      "id": "n9",
+      "kind": "response",
+      "label": "200 Order (with items + product)",
+      "depth": 2,
+      "metadata": {
+        "httpStatus": 200,
+        "shape": "Order & { items: (OrderItem & { product: Pick<Product, 'id'|'name'|'price'> })[] }"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "n1",
+      "to": "n2",
+      "kind": "input-bind",
+      "confidence": "high",
+      "metadata": { "site": "express middleware chain in src/routes/orders.ts:50" }
+    },
+    {
+      "id": "e2",
+      "from": "n2",
+      "to": "n3",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": "express next() in src/lib/auth.ts:23" }
+    },
+    {
+      "id": "e3",
+      "from": "n3",
+      "to": "n4",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/routes/orders.ts", "line": 53 } }
+    },
+    {
+      "id": "e4",
+      "from": "n4",
+      "to": "n5",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 90 } }
+    },
+    {
+      "id": "e5",
+      "from": "n5",
+      "to": "n6",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "Order",
+        "where": "{ id: orderId, userId }",
+        "businessRule": "ownership check folded into where-clause"
+      }
+    },
+    {
+      "id": "e6",
+      "from": "n5",
+      "to": "n7",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "OrderItem",
+        "via": "include:{items:...}",
+        "joinFrom": "Order"
+      }
+    },
+    {
+      "id": "e7",
+      "from": "n5",
+      "to": "n8",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "Product",
+        "via": "include:{product:{select:{id,name,price}}}",
+        "joinFrom": "OrderItem"
+      }
+    },
+    {
+      "id": "e8",
+      "from": "n4",
+      "to": "n9",
+      "kind": "return",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 104 } }
+    },
+    {
+      "id": "e9",
+      "from": "n3",
+      "to": "n9",
+      "kind": "return",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/routes/orders.ts", "line": 54 }, "httpStatus": 200 }
+    }
+  ],
+  "cycles": [],
+  "truncations": []
+}

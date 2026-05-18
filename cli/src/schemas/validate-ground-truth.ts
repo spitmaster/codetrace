@@ -55,8 +55,38 @@ const targets: Target[] = [
     schema: FlowGraphSchema,
   },
   {
+    label: "FlowGraph (GET /api/orders)",
+    path: resolve(gtDir, "flow-graph-GET_api_orders.expected.json"),
+    schema: FlowGraphSchema,
+  },
+  {
+    label: "FlowGraph (GET /api/orders/:id)",
+    path: resolve(gtDir, "flow-graph-GET_api_orders_id.expected.json"),
+    schema: FlowGraphSchema,
+  },
+  {
+    label: "FlowGraph (DELETE /api/orders/:id)",
+    path: resolve(gtDir, "flow-graph-DELETE_api_orders_id.expected.json"),
+    schema: FlowGraphSchema,
+  },
+  {
     label: "BusinessAnnotations (POST /api/orders)",
     path: resolve(gtDir, "business-annotations-POST_api_orders.expected.json"),
+    schema: BusinessAnnotationsSchema,
+  },
+  {
+    label: "BusinessAnnotations (GET /api/orders)",
+    path: resolve(gtDir, "business-annotations-GET_api_orders.expected.json"),
+    schema: BusinessAnnotationsSchema,
+  },
+  {
+    label: "BusinessAnnotations (GET /api/orders/:id)",
+    path: resolve(gtDir, "business-annotations-GET_api_orders_id.expected.json"),
+    schema: BusinessAnnotationsSchema,
+  },
+  {
+    label: "BusinessAnnotations (DELETE /api/orders/:id)",
+    path: resolve(gtDir, "business-annotations-DELETE_api_orders_id.expected.json"),
     schema: BusinessAnnotationsSchema,
   },
 ];

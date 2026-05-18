@@ -1,0 +1,169 @@
+{
+  "_comment": "Ground-truth BusinessAnnotations for DELETE /api/orders/:id. Used by business-translator regression. Pass criterion: narrativeConfidence=high AND ≥ 80% of nodeAnnotations match (by businessLabel synonyms acceptable) AND every annotation has non-empty evidence (anti-fabrication red line).",
+  "_evidenceSource": "fixtures/fixture-a-order-app/backend/README.md §4 DELETE /api/orders/:id + src/services/order-service.ts:111-137 + src/services/inventory-service.ts:74-84 (commit cb14140 of feature/codeviz-m1)",
+  "_redLine": "Per codeviz-overview red line #2: evidence may not be empty. If the translator outputs an annotation without any evidence, fail the regression even if the label is correct.",
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:DELETE:/api/orders/:id",
+  "narrative": "当前用户带着 x-user-id 与订单 id 调 DELETE 接口取消订单,系统在一个数据库事务中完成:校验订单存在且归属当前用户(否则 404)→ 校验订单仍处于 pending,否则视为状态机违规返回 409 → 把订单内每个订单行的数量按商品逐一加回 Product.stock(库存回滚)→ 将订单状态翻为 cancelled。整条链路里 OrderItem 只读不写;Product 与 Order 都会被写。再次取消已 cancelled 订单会因为状态检查继续返回 409,不具备幂等性,这是有意为之。",
+  "narrativeConfidence": "high",
+  "narrativeEvidence": [
+    "src/routes/orders.ts:62-73 (DELETE 路由 + requireUser + 调用 cancelOrder)",
+    "src/services/order-service.ts:111-137 (cancelOrder 在 prisma.$transaction 中:findFirst 校验归属 → 校验 status === pending → restoreStock → tx.order.update)",
+    "src/services/inventory-service.ts:74-84 (restoreStock 对每个订单行做 stock increment)",
+    "backend/README.md §3.4 取消订单状态机与错误码",
+    "backend/README.md §4 DELETE /api/orders/:id 业务意图清单"
+  ],
+  "nodeAnnotations": [
+    {
+      "nodeId": "n2",
+      "businessLabel": "鉴权(取 x-user-id)",
+      "businessDescription": "从请求 header 中读取 x-user-id 当作买家身份;header 缺失即返回 401",
+      "confidence": "high",
+      "evidence": [
+        "src/lib/auth.ts:18 const userId = req.header(\"x-user-id\")",
+        "src/lib/auth.ts:19-21 抛 UnauthorizedError"
+      ]
+    },
+    {
+      "nodeId": "n3",
+      "businessLabel": "取消订单接口入口",
+      "businessDescription": "DELETE /api/orders/:id 路由,把 userId 与 path 中的 id 交给 cancelOrder 服务,并把结果 res.json 返回",
+      "confidence": "high",
+      "evidence": [
+        "src/routes/orders.ts:62 ordersRouter.delete(\"/:id\", requireUser, ...)",
+        "src/routes/orders.ts:67 调用 cancelOrder(req.userId, req.params.id)",
+        "src/routes/orders.ts:68 res.json(result)"
+      ]
+    },
+    {
+      "nodeId": "n4",
+      "businessLabel": "取消订单(事务编排)",
+      "businessDescription": "在一个 Prisma 事务里:查订单+items → 校验 pending → restoreStock → 状态翻为 cancelled;任一步失败回滚",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:112 prisma.$transaction(async (tx) => { ... })",
+        "src/services/order-service.ts:111-137 函数 cancelOrder 主体"
+      ]
+    },
+    {
+      "nodeId": "n5",
+      "businessLabel": "查订单 + 校验归属",
+      "businessDescription": "where:{id, userId} 同时校验存在与归属,不属于当前用户则视同不存在,直接 404",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:113-116 tx.order.findFirst({ where: { id: orderId, userId }, include: { items: true } })",
+        "src/services/order-service.ts:117-119 if (!order) throw new NotFoundError",
+        "src/services/order-service.ts:120-124 status !== \"pending\" → ConflictError"
+      ]
+    },
+    {
+      "nodeId": "n6",
+      "businessLabel": "回滚库存",
+      "businessDescription": "对订单内每个 OrderItem 取 productId 与 quantity,在事务内把数量加回对应商品的 stock",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:126-129 调用 restoreStock(tx, items.map(...))",
+        "src/services/inventory-service.ts:74-84 restoreStock 函数主体",
+        "backend/README.md §4 DELETE /api/orders/:id evidence 锚点:restoreStock → tx.product.update({ stock: increment })"
+      ]
+    },
+    {
+      "nodeId": "n7",
+      "businessLabel": "增加库存(回滚)",
+      "businessDescription": "把订单行的 quantity 加回 Product.stock,reserveStock 的反向操作;无库存上限校验",
+      "confidence": "high",
+      "evidence": [
+        "src/services/inventory-service.ts:78-82 tx.product.update({ data: { stock: { increment: item.quantity } } })"
+      ]
+    },
+    {
+      "nodeId": "n8",
+      "businessLabel": "翻订单状态为 cancelled",
+      "businessDescription": "状态机转移 pending → cancelled,只改 status 字段",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:131-134 tx.order.update({ where: { id }, data: { status: \"cancelled\" } })",
+        "backend/README.md §2 不变量 #3:订单状态机,仅 pending 可被取消"
+      ]
+    },
+    {
+      "nodeId": "n9",
+      "businessLabel": "订单表",
+      "businessDescription": "订单头表;本链路读 1 次写 1 次(状态翻转)",
+      "confidence": "high",
+      "evidence": ["prisma/schema.prisma:41-52 model Order"]
+    },
+    {
+      "nodeId": "n10",
+      "businessLabel": "订单行表(只读)",
+      "businessDescription": "通过 include:{items:true} 一并读出,用于驱动 restoreStock;本链路不写订单行(订单状态翻转不删行)",
+      "confidence": "high",
+      "evidence": [
+        "prisma/schema.prisma:57-68 model OrderItem",
+        "src/services/order-service.ts:115 include:{ items: true }"
+      ]
+    },
+    {
+      "nodeId": "n11",
+      "businessLabel": "商品表",
+      "businessDescription": "本链路对每个订单行所对应的 Product 做一次 stock 回滚写",
+      "confidence": "high",
+      "evidence": [
+        "prisma/schema.prisma:28-36 model Product",
+        "prisma/schema.prisma:32 stock Int(库存计数器)"
+      ]
+    },
+    {
+      "nodeId": "n12",
+      "businessLabel": "返回取消结果",
+      "businessDescription": "成功时返回 { orderId, status: \"cancelled\" },HTTP 200",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:135 return { orderId: updated.id, status: updated.status }",
+        "src/routes/orders.ts:68 res.json(result)"
+      ]
+    }
+  ],
+  "edgeAnnotations": [
+    {
+      "edgeId": "e5",
+      "businessLabel": "读订单(归属校验)",
+      "confidence": "high",
+      "evidence": [
+        "tx.order.findFirst with where:{id, userId} at src/services/order-service.ts:113-116"
+      ]
+    },
+    {
+      "edgeId": "e6",
+      "businessLabel": "读订单行(驱动回滚)",
+      "confidence": "high",
+      "evidence": [
+        "include:{items:true} at src/services/order-service.ts:115"
+      ]
+    },
+    {
+      "edgeId": "e9",
+      "businessLabel": "加库存(写)",
+      "confidence": "high",
+      "evidence": [
+        "tx.product.update with stock:{increment} at src/services/inventory-service.ts:78-82"
+      ]
+    },
+    {
+      "edgeId": "e11",
+      "businessLabel": "状态机翻为 cancelled(写)",
+      "confidence": "high",
+      "evidence": [
+        "tx.order.update with data:{status:\"cancelled\"} at src/services/order-service.ts:131-134"
+      ]
+    },
+    {
+      "edgeId": "e13",
+      "businessLabel": "返回客户端 200",
+      "confidence": "high",
+      "evidence": [
+        "res.json(result) at src/routes/orders.ts:68"
+      ]
+    }
+  ]
+}
