@@ -1,94 +1,79 @@
-# Todo — feature/codeviz-m1 (当前: M1.1 测试夹具就位)
+# Todo — feature/codeviz-m1 (当前: M1.2 静态分析 + IO 入口识别)
 
-> 服务于 [milestones/feature_codeviz-m1.md → M1.1](../milestones/feature_codeviz-m1.md) 的可勾选清单。
-> **M1.1 完结后,本文件整段清空,重写为 M1.2 内容** (按全局 `~/.claude/CLAUDE.md` §2.2)。
-> 真相源: [SPEC.md](../../SPEC.md), [agents/codeviz-overview.md](../agents/codeviz-overview.md), [agents/fixture-validator.md](../agents/fixture-validator.md)
+> 服务于 [milestones/feature_codeviz-m1.md → M1.2](../milestones/feature_codeviz-m1.md) 的可勾选清单。
+> **M1.2 完结后,本文件整段清空,重写为 M1.3 内容** (按全局 `~/.claude/CLAUDE.md` §2.2)。
+> 真相源: [SPEC.md](../../SPEC.md), [agents/codeviz-overview.md](../agents/codeviz-overview.md), [agents/static-code-analyzer.md](../agents/static-code-analyzer.md), [agents/io-entry-mapper.md](../agents/io-entry-mapper.md)
 
 ---
 
-## M1.1: 测试夹具就位
+## M1.2: 静态分析 + IO 入口识别
 
 ### 上下文
 
-**为什么 M1.1 是夹具,不是 CLI?**
-Fixture-A 是 M1.2 – M1.5 四个子里程碑的「测试地基」。所有 agent 都对着它跑、对着它出 ground-truth、对着它做回归。先做 CLI 再回头补夹具会陷入「CLI 在玩具上跑通了,真实场景一塌糊涂」的陷阱。
-负责 agent: **fixture-validator**
+**M1.1 已完结**:Fixture-A 后端 + 前端骨架 + 10 份 ground-truth(symbol/io + 4×flow + 4×business)全部就位,`npm run fixture:health` 9/9 通过,`npm run validate:ground-truth` 10/10 通过。
 
-**Fixture-A 的设计标准:**
-- ✅ 麻雀虽小五脏俱全 (4+ 表 + 复合业务规则)
-- ✅ 真实可跑 (curl 能调通 4 个 endpoints,前端能从列表→创建→详情走完一遍)
-- ❌ 不能玩具到 LLM 翻译没难度 (要有「扣库存」「订单状态机」这种业务规则)
-- ❌ 不能复杂到 80% 准确率不可能 (单 endpoint 调用链深度 ≤ 8)
+**M1.2 要做的事**:
+- **static-code-analyzer**:对 fixture-A `backend/src/**/*.ts` 跑静态分析,产出符合 `cli/src/schemas/symbol-graph.ts` schema 的 SymbolGraph,与 ground-truth 比对召回 ≥ 80%。
+- **io-entry-mapper**:基于 SymbolGraph + 直接扫源码,产出 IOEntryRegistry,与 ground-truth 比对**准确率 100%**(per SPEC §7)。
+
+**红线提醒**:
+- M1.2 只支持 **TS + Express + Prisma**(red line #4),其它一律不分析。
+- 中间表示必须带 `schemaVersion: "0.1.0"`(red line #6)。
+- 目标项目源码只读(red line #5),analyzer 只读 `fixtures/fixture-a-order-app/backend/`,不修改。
+- Symbol ID 严格按 `ts:src/path.ts#qualifiedName` 格式。
 
 ### 任务清单
 
-#### 阶段 A — 后端骨架 (Express + Prisma)
+#### 阶段 A — Analyzer 核心(static-code-analyzer)
 
-- [x] **T1** 在 `fixtures/fixture-a-order-app/backend/` 初始化 Node 18 + TypeScript + Express + Prisma + SQLite
-- [x] **T2** 设计 Prisma schema (`prisma/schema.prisma`):
-  - `User` (id / email / name)
-  - `Product` (id / name / price / stock)
-  - `Order` (id / userId / status: pending/paid/cancelled / totalAmount / createdAt)
-  - `OrderItem` (id / orderId / productId / quantity / unitPrice)
-- [x] **T3** 实现 `POST /api/orders` (创建订单):验入参 → 查产品库存 → 扣库存(事务)→ 写 Order → 写 OrderItem → 返回 orderId
-- [x] **T4** 实现 `GET /api/orders` (列订单):鉴权(假实现,从 header 取 userId)→ 按 userId 分页查询
-- [x] **T5** 实现 `GET /api/orders/:id` (订单详情):查 Order + 关联展开 OrderItem + Product
-- [x] **T6** 实现 `DELETE /api/orders/:id` (取消订单):查状态 → 仅 pending 可取消 → 事务:回滚库存 + 改 status=cancelled
-- [x] **T7** 在 backend README 标注每个 endpoint 的「业务意图」中文描述 (这就是 BusinessAnnotations 的 ground-truth 来源)
-- [x] **T8** seed 脚本:插 3 个用户 + 5 个产品 + 2 个示例订单
+- [x] **T21** 在 `cli/src/analyzer/` 建目录,引入 `ts-morph`(2026-05-18)
+- [x] **T22** 实现 `analyzeProject(projectRoot) => SymbolGraph`:`<root>/src/**/*.ts`,跳过 node_modules/dist/prisma
+- [x] **T23** 抽取 symbols:function/method/class/variable/handler(`ts:<rel>#<qn>`)
+- [x] **T24** 抽取 calls:direct + framework-injected(中间件 → handler)
+- [x] **T25** 抽取 frameworkPoints:route-registration / router-mount / middleware-mount / middleware-definition
+- [x] **T26** 抽取 dataAccessPoints:`prisma.X.Y` 与 `tx.X.Y`,op 分类 read/write/delete + **`include` 关系展开为额外 read**(bonus,M1.3 trace 用得到)
+- [x] **T27** CLI 入口 `cli/src/index.ts`:`analyze <root> [--output <file>]` 子命令
+- [x] **T28** 单测(vitest):7 个 assertions — schema 版本、framework 识别、symbol 召回 100%(19/19)、call 召回 100%(10/10)、dataAccessPoint 全覆盖、route-registration 4/4、router-mount/middleware-definition
 
-#### 阶段 B — 前端骨架 (M1 仅作目标项目存在,本身不被 codeviz 分析)
+#### 阶段 B — IO Entry Mapper(io-entry-mapper)
 
-- [ ] **T9** 在 `fixtures/fixture-a-order-app/frontend/` 初始化 Vite + React 18 + TypeScript
-- [ ] **T10** 最小订单页:列表 + 创建按钮 + 详情;调用 backend 4 个 API
-- [ ] **T11** README 写明 `npm run dev` 启动方式 (前后端两边)
+- [x] **T29** 在 `cli/src/io-mapper/` 实现 `mapEntries({projectRoot}) => IOEntryRegistry`
+- [x] **T30** 入口识别:Router 变量扫描 + app.use mount 拼接 + app.get/post 直挂(`/health`)
+- [x] **T31** entry id 格式 `io:http:<METHOD>:<fullPath>`,与 ground-truth 完全一致
+- [x] **T32** middlewareSymbolIds:解析 `router.X(path, ...mw, handler)` 中的 Identifier 中间件,通过 import 关系拼到对应 symbol id
+- [x] **T33** CLI 子命令 `map-io <root>`
+- [x] **T34** 单测(vitest):5 个 assertions — entry 数 = 5、id/displayName/handlerSymbolId 逐字段一致、middlewareSymbolIds 一致、所有 confidence=high(准确率 100%,SPEC §7)
 
-> ⚠️ M1 阶段 codeviz 只分析 backend,frontend 入口识别推到 M2
+#### 阶段 C — 工程基建
 
-#### 阶段 C — Ground-Truth (人工产出,这是夹具的灵魂)
+- [x] **T35** 仓库根 `package.json` 增 `cli:test` / `cli:analyze` / `cli:map-io` / `cli:trace` scripts
+- [x] **T36** `cli/package.json` 添加 ts-morph + vitest 依赖;CLI 解析自己写小手卷(暂不引 commander 减少依赖)
+- [x] **T37** README:`cli/README.md` 说明 3 个子命令 + schema 版本与边界
 
-- [x] **T12** 写 `ground-truth/symbol-graph.expected.json`:覆盖关键 symbols(全部 Controller / Service / Prisma 调用 + 关键调用边)
-- [x] **T13** 写 `ground-truth/io-entry-registry.expected.json`:4 个 HTTP endpoints(实际给了 5 个,含 `/health`)
-- [x] **T14** 写 `ground-truth/flow-graph-POST_api_orders.expected.json`:创建订单完整数据流(节点至少包含 OrderController.create / OrderService.create / InventoryService.reserve / prisma.order.create / prisma.orderItem.createMany / orders 表 / orderItems 表 / products 表)
-- [x] **T15** 写 `ground-truth/business-annotations-POST_api_orders.expected.json`:中文 narrative 标准答案 + 节点级 businessLabel + evidence 来源
-- [ ] **T16** (可选,加分项) 为另外 3 个 endpoints 各出一份 ground-truth → 提升 M1.2-M1.5 的回归覆盖率
+### M1.2 验收
 
-#### 阶段 D — Fixture 自我健康检查
+- [x] 全部 T21 – T37 勾选(2026-05-18)
+- [x] `npm run cli:test` 全部通过(28/28 — 含 M1.3 tracer 16 项)
+- [x] `npm run cli:analyze -- fixtures/fixture-a-order-app/backend` 产出的 SymbolGraph 通过 `SymbolGraphSchema.parse`
+- [x] SymbolGraph 召回 100%(19/19 期望符号 + 2 个 server.ts 额外项,实际 ⊇ 期望)
+- [x] `npm run cli:map-io -- fixtures/fixture-a-order-app/backend` 产出的 IOEntryRegistry 与 ground-truth 完全一致(准确率 100%)
+- [ ] codeviz-orchestrator 审阅通过(契约对齐 + 红线无违反)— 待用户最终签收 commit + push
 
-- [x] **T17** 写 `fixtures/fixture-a-order-app/scripts/health-check.sh`:启 backend → curl 4 个 endpoints → 断言响应 → 关掉(实际跑 9 个断言,含库存不足 → 409 / 跨用户 → 404 / 重复取消 → 409 等不变量)
-- [x] **T18** 在仓库根 `package.json` 加 `"fixture:health": "bash fixtures/fixture-a-order-app/scripts/health-check.sh"`
-
-#### 阶段 E — Schema 沉淀
-
-- [x] **T19** 在 `cli/src/schemas/` 用 **zod** 实现 4 个 schema 的运行时校验(SymbolGraph / IOEntryRegistry / FlowGraph / BusinessAnnotations,版本 0.1.0)
-- [x] **T20** 用上述 zod schema 校验 4 份 ground-truth 文件,确保它们结构合法 — 这是 M1.2 起所有 agent 输出格式的"参考答案"
-
-### M1.1 验收
-
-- [ ] 全部 T1 – T20 勾选 (T16 可选) — **T9/T10/T11 (Stage B 前端) 仍未做**
-- [x] backend 可启动 + curl 4 个 endpoints 拿到正确数据
-- [ ] frontend 可启动 + 走通"创建订单 → 列表 → 详情" — **Stage B 待补**
-- [x] `npm run fixture:health` 通过 (2026-05-18 验证:9/9 断言通过)
-- [x] 全部 ground-truth/*.json 通过 zod schema 校验 (2026-05-18 `npm run validate:ground-truth` 4/4 通过)
-- [ ] codeviz-orchestrator 审阅通过 (跨层契约对齐 + 没改用户原始代码)
-
-### M1.1 完结操作
+### M1.2 完结操作
 
 完结时按 `~/.claude/CLAUDE.md` §2.2:
 
-1. **本文件整段清空**,重写为 M1.2 内容 (静态分析 + IO 入口识别 的可勾选清单)
-2. 在 [milestones/feature_codeviz-m1.md 子里程碑表](../milestones/feature_codeviz-m1.md#子里程碑) 把 M1.1 行从 ⏳ 改 ✅,加 commit 哈希 + 日期
-3. 启动 M1.2 — 由 codeviz-orchestrator 调度 static-code-analyzer 和 io-entry-mapper
+1. **本文件整段清空**,重写为 M1.3 内容(数据流追踪 dataflow-tracer 的可勾选清单)
+2. 在 [milestones/feature_codeviz-m1.md 子里程碑表](../milestones/feature_codeviz-m1.md#子里程碑) 把 M1.2 行从 ⏳ 改 ✅,加 commit 哈希 + 日期
+3. 启动 M1.3 — 由 codeviz-orchestrator 调度 dataflow-tracer
 
 ---
 
-## 不在 M1.1 范围 (避免范围蔓延)
+## 不在 M1.2 范围 (避免范围蔓延)
 
-显式标注以下事项 **本子里程碑不做**:
-
-- ❌ 写 CLI 任何代码 (那是 M1.2 起)
-- ❌ 实现 tree-sitter 解析逻辑
-- ❌ 实现 LLM 翻译逻辑
-- ❌ 实现浏览器前端
-- ❌ 给 fixture 加身份认证 / 权限系统 (假实现即可,业务复杂度不在这里堆)
-- ❌ 优化 fixture 性能 (M1 不关心 fixture 自身性能)
+- ❌ FlowGraph 追踪(M1.3)
+- ❌ LLM 翻译(M1.4)
+- ❌ 浏览器前端(M1.5)
+- ❌ Java / Vue / Python 等其他语言/框架(M2+)
+- ❌ NestJS 装饰器路由(SPEC §M1 功能 1 说 "Express 或 NestJS 二选一",M1.2 选 Express)
+- ❌ tree-sitter(SPEC 提到 tree-sitter,M1.2 实际选 ts-morph/typescript;tree-sitter 留给 M2 Java/Vue 扩展)
