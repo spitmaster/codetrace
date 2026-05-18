@@ -16,7 +16,8 @@
       "Bash(cp /f/workspace/ai/codetrace/docs/commands/sdd-starter.md /c/Users/zhouyijin/.claude/commands/sdd-starter.md)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\zhouyijin\\.claude"
+      "C:\\Users\\zhouyijin\\.claude",
+      "C:\\Users\\Administrator\\.claude"
     ]
   }
 }
