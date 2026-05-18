@@ -47,29 +47,29 @@ Fixture-A 是 M1.2 – M1.5 四个子里程碑的「测试地基」。所有 age
 
 #### 阶段 C — Ground-Truth (人工产出,这是夹具的灵魂)
 
-- [ ] **T12** 写 `ground-truth/symbol-graph.expected.json`:覆盖关键 symbols(全部 Controller / Service / Prisma 调用 + 关键调用边)
-- [ ] **T13** 写 `ground-truth/io-entry-registry.expected.json`:4 个 HTTP endpoints
-- [ ] **T14** 写 `ground-truth/flow-graph-POST_api_orders.expected.json`:创建订单完整数据流(节点至少包含 OrderController.create / OrderService.create / InventoryService.reserve / prisma.order.create / prisma.orderItem.createMany / orders 表 / orderItems 表 / products 表)
-- [ ] **T15** 写 `ground-truth/business-annotations-POST_api_orders.expected.json`:中文 narrative 标准答案 + 节点级 businessLabel + evidence 来源
+- [x] **T12** 写 `ground-truth/symbol-graph.expected.json`:覆盖关键 symbols(全部 Controller / Service / Prisma 调用 + 关键调用边)
+- [x] **T13** 写 `ground-truth/io-entry-registry.expected.json`:4 个 HTTP endpoints(实际给了 5 个,含 `/health`)
+- [x] **T14** 写 `ground-truth/flow-graph-POST_api_orders.expected.json`:创建订单完整数据流(节点至少包含 OrderController.create / OrderService.create / InventoryService.reserve / prisma.order.create / prisma.orderItem.createMany / orders 表 / orderItems 表 / products 表)
+- [x] **T15** 写 `ground-truth/business-annotations-POST_api_orders.expected.json`:中文 narrative 标准答案 + 节点级 businessLabel + evidence 来源
 - [ ] **T16** (可选,加分项) 为另外 3 个 endpoints 各出一份 ground-truth → 提升 M1.2-M1.5 的回归覆盖率
 
 #### 阶段 D — Fixture 自我健康检查
 
-- [ ] **T17** 写 `fixtures/fixture-a-order-app/scripts/health-check.sh`:启 backend → curl 4 个 endpoints → 断言响应 → 关掉
-- [ ] **T18** 在仓库根 `package.json` 加 `"fixture:health": "bash fixtures/fixture-a-order-app/scripts/health-check.sh"`
+- [x] **T17** 写 `fixtures/fixture-a-order-app/scripts/health-check.sh`:启 backend → curl 4 个 endpoints → 断言响应 → 关掉(实际跑 9 个断言,含库存不足 → 409 / 跨用户 → 404 / 重复取消 → 409 等不变量)
+- [x] **T18** 在仓库根 `package.json` 加 `"fixture:health": "bash fixtures/fixture-a-order-app/scripts/health-check.sh"`
 
 #### 阶段 E — Schema 沉淀
 
-- [ ] **T19** 在 `cli/src/schemas/` 用 **zod** 实现 4 个 schema 的运行时校验(SymbolGraph / IOEntryRegistry / FlowGraph / BusinessAnnotations,版本 0.1.0)
-- [ ] **T20** 用上述 zod schema 校验 4 份 ground-truth 文件,确保它们结构合法 — 这是 M1.2 起所有 agent 输出格式的"参考答案"
+- [x] **T19** 在 `cli/src/schemas/` 用 **zod** 实现 4 个 schema 的运行时校验(SymbolGraph / IOEntryRegistry / FlowGraph / BusinessAnnotations,版本 0.1.0)
+- [x] **T20** 用上述 zod schema 校验 4 份 ground-truth 文件,确保它们结构合法 — 这是 M1.2 起所有 agent 输出格式的"参考答案"
 
 ### M1.1 验收
 
-- [ ] 全部 T1 – T20 勾选 (T16 可选)
-- [ ] backend 可启动 + curl 4 个 endpoints 拿到正确数据
-- [ ] frontend 可启动 + 走通"创建订单 → 列表 → 详情"
-- [ ] `npm run fixture:health` 通过
-- [ ] 全部 ground-truth/*.json 通过 zod schema 校验
+- [ ] 全部 T1 – T20 勾选 (T16 可选) — **T9/T10/T11 (Stage B 前端) 仍未做**
+- [x] backend 可启动 + curl 4 个 endpoints 拿到正确数据
+- [ ] frontend 可启动 + 走通"创建订单 → 列表 → 详情" — **Stage B 待补**
+- [x] `npm run fixture:health` 通过 (2026-05-18 验证:9/9 断言通过)
+- [x] 全部 ground-truth/*.json 通过 zod schema 校验 (2026-05-18 `npm run validate:ground-truth` 4/4 通过)
 - [ ] codeviz-orchestrator 审阅通过 (跨层契约对齐 + 没改用户原始代码)
 
 ### M1.1 完结操作

@@ -9,7 +9,7 @@
 
 ## 状态
 
-🚧 **进行中** — M1.1 阶段 A(后端骨架 T1-T8)于 2026-05-18 完成。阶段 B(前端骨架)/ C(ground-truth)/ D(health check)/ E(zod schema) 留待后续 session。
+🚧 **进行中** — M1.1 阶段 A / C / D / E(共 13/20 任务,T1-T8 + T12-T15 + T17-T20)于 2026-05-18 完成。**阶段 B(前端骨架 T9-T11)与可选 T16 仍未做**;`npm run fixture:health` 9/9 断言通过、4 份 ground-truth 全部通过 zod schema 校验。
 
 ## 子里程碑
 
@@ -33,14 +33,16 @@
 
 > 详细任务级清单在 [todo/feature_codeviz-m1.md](../todo/feature_codeviz-m1.md);本节只列里程碑级交付物。
 
-- [ ] `fixtures/fixture-a-order-app/frontend/` (React 最小订单系统 UI)
-- [ ] `fixtures/fixture-a-order-app/backend/` (Express + Prisma 订单 API,4 个 endpoints)
-- [ ] `fixtures/fixture-a-order-app/prisma/schema.prisma` (User/Order/OrderItem/Product 4 表)
-- [ ] `fixtures/fixture-a-order-app/ground-truth/symbol-graph.expected.json`
-- [ ] `fixtures/fixture-a-order-app/ground-truth/io-entry-registry.expected.json`
-- [ ] `fixtures/fixture-a-order-app/ground-truth/flow-graph-POST_api_orders.expected.json`
-- [ ] `fixtures/fixture-a-order-app/ground-truth/business-annotations-POST_api_orders.expected.json`
-- [ ] `fixtures/fixture-a-order-app/README.md` (覆盖场景说明)
+- [ ] `fixtures/fixture-a-order-app/frontend/` (React 最小订单系统 UI) — **Stage B 待做**
+- [x] `fixtures/fixture-a-order-app/backend/` (Express + Prisma 订单 API,4 个 endpoints)
+- [x] `fixtures/fixture-a-order-app/backend/prisma/schema.prisma` (User/Order/OrderItem/Product 4 表)
+- [x] `fixtures/fixture-a-order-app/ground-truth/symbol-graph.expected.json`
+- [x] `fixtures/fixture-a-order-app/ground-truth/io-entry-registry.expected.json`
+- [x] `fixtures/fixture-a-order-app/ground-truth/flow-graph-POST_api_orders.expected.json`
+- [x] `fixtures/fixture-a-order-app/ground-truth/business-annotations-POST_api_orders.expected.json`
+- [x] `fixtures/fixture-a-order-app/backend/README.md` (覆盖场景说明 + 业务意图清单)
+- [x] `fixtures/fixture-a-order-app/scripts/health-check.sh` + 仓库根 `npm run fixture:health`
+- [x] `cli/src/schemas/*.ts` (4 个 zod schema,版本 0.1.0) + `npm run validate:ground-truth`
 
 ### M1.2 — M1.5
 
@@ -59,5 +61,6 @@
 
 | 日期 | commit | 修订 |
 |---|---|---|
-| 2026-05-18 | (待提交) | M1.1 阶段 A(后端骨架 T1-T8)完成,状态从 ⏳ 改 🚧;`fixtures/fixture-a-order-app/backend/` 4 endpoints + seed + README 业务意图就位 |
+| 2026-05-18 | (待提交) | M1.1 阶段 C / D / E 完成(T12-T15 + T17-T20):4 份 ground-truth JSON + 4 个 zod schema + 一键 `fixture:health`(9 断言)+ `validate:ground-truth`(4/4 通过)。M1.1 进度 8/20 → 13/20,Stage B(前端 T9-T11)仍 pending |
+| 2026-05-18 | 7e7ec2b / cb14140 | M1.1 阶段 A(后端骨架 T1-T8)完成,状态从 ⏳ 改 🚧;`fixtures/fixture-a-order-app/backend/` 4 endpoints + seed + README 业务意图就位 |
 | 2026-05-18 | (创建) | 初稿。5 个子里程碑 + 高层交付物 + 退出条件 |
