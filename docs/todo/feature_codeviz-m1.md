@@ -24,18 +24,18 @@ Fixture-A 是 M1.2 – M1.5 四个子里程碑的「测试地基」。所有 age
 
 #### 阶段 A — 后端骨架 (Express + Prisma)
 
-- [ ] **T1** 在 `fixtures/fixture-a-order-app/backend/` 初始化 Node 18 + TypeScript + Express + Prisma + SQLite
-- [ ] **T2** 设计 Prisma schema (`prisma/schema.prisma`):
+- [x] **T1** 在 `fixtures/fixture-a-order-app/backend/` 初始化 Node 18 + TypeScript + Express + Prisma + SQLite
+- [x] **T2** 设计 Prisma schema (`prisma/schema.prisma`):
   - `User` (id / email / name)
   - `Product` (id / name / price / stock)
   - `Order` (id / userId / status: pending/paid/cancelled / totalAmount / createdAt)
   - `OrderItem` (id / orderId / productId / quantity / unitPrice)
-- [ ] **T3** 实现 `POST /api/orders` (创建订单):验入参 → 查产品库存 → 扣库存(事务)→ 写 Order → 写 OrderItem → 返回 orderId
-- [ ] **T4** 实现 `GET /api/orders` (列订单):鉴权(假实现,从 header 取 userId)→ 按 userId 分页查询
-- [ ] **T5** 实现 `GET /api/orders/:id` (订单详情):查 Order + 关联展开 OrderItem + Product
-- [ ] **T6** 实现 `DELETE /api/orders/:id` (取消订单):查状态 → 仅 pending 可取消 → 事务:回滚库存 + 改 status=cancelled
-- [ ] **T7** 在 backend README 标注每个 endpoint 的「业务意图」中文描述 (这就是 BusinessAnnotations 的 ground-truth 来源)
-- [ ] **T8** seed 脚本:插 3 个用户 + 5 个产品 + 2 个示例订单
+- [x] **T3** 实现 `POST /api/orders` (创建订单):验入参 → 查产品库存 → 扣库存(事务)→ 写 Order → 写 OrderItem → 返回 orderId
+- [x] **T4** 实现 `GET /api/orders` (列订单):鉴权(假实现,从 header 取 userId)→ 按 userId 分页查询
+- [x] **T5** 实现 `GET /api/orders/:id` (订单详情):查 Order + 关联展开 OrderItem + Product
+- [x] **T6** 实现 `DELETE /api/orders/:id` (取消订单):查状态 → 仅 pending 可取消 → 事务:回滚库存 + 改 status=cancelled
+- [x] **T7** 在 backend README 标注每个 endpoint 的「业务意图」中文描述 (这就是 BusinessAnnotations 的 ground-truth 来源)
+- [x] **T8** seed 脚本:插 3 个用户 + 5 个产品 + 2 个示例订单
 
 #### 阶段 B — 前端骨架 (M1 仅作目标项目存在,本身不被 codeviz 分析)
 

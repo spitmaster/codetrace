@@ -9,7 +9,7 @@
 
 ## 状态
 
-⏳ **未开始** (本文件创建于 2026-05-18,等 [todo/feature_codeviz-m1.md](../todo/feature_codeviz-m1.md) 启动 M1.1)
+🚧 **进行中** — M1.1 阶段 A(后端骨架 T1-T8)于 2026-05-18 完成。阶段 B(前端骨架)/ C(ground-truth)/ D(health check)/ E(zod schema) 留待后续 session。
 
 ## 子里程碑
 
@@ -17,7 +17,7 @@
 
 | ID | 主题 | 负责 agent | 依赖 | 状态 | 主要交付物 |
 |---|---|---|---|---|---|
-| **M1.1** | 测试夹具就位 | fixture-validator | — | ⏳ | `fixtures/fixture-a-order-app/*` + ground-truth |
+| **M1.1** | 测试夹具就位 | fixture-validator | — | 🚧 | `fixtures/fixture-a-order-app/*` + ground-truth |
 | **M1.2** | 静态分析 + IO 入口识别 | static-code-analyzer + io-entry-mapper | M1.1 | ⏳ | `cli/src/analyzer/*` + `cli/src/io-mapper/*`,产出 SymbolGraph + IOEntryRegistry |
 | **M1.3** | 数据流追踪 | dataflow-tracer | M1.2 | ⏳ | `cli/src/tracer/*`,产出 FlowGraph |
 | **M1.4** | 业务翻译 + LLM Provider 抽象 | business-translator | M1.3 | ⏳ | `cli/src/translator/*`,Provider 至少 Claude + Ollama |
@@ -59,4 +59,5 @@
 
 | 日期 | commit | 修订 |
 |---|---|---|
+| 2026-05-18 | (待提交) | M1.1 阶段 A(后端骨架 T1-T8)完成,状态从 ⏳ 改 🚧;`fixtures/fixture-a-order-app/backend/` 4 endpoints + seed + README 业务意图就位 |
 | 2026-05-18 | (创建) | 初稿。5 个子里程碑 + 高层交付物 + 退出条件 |
