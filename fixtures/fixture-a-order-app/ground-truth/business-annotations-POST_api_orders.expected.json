@@ -1,0 +1,179 @@
+{
+  "_comment": "Ground-truth BusinessAnnotations for POST /api/orders. Used by business-translator regression. Pass criterion: narrativeConfidence=high AND ≥ 80% of nodeAnnotations match (by businessLabel synonyms acceptable) AND every annotation has non-empty evidence (anti-fabrication red line).",
+  "_evidenceSource": "fixtures/fixture-a-order-app/backend/README.md §4 + the actual source code referenced therein (commit cb14140 of feature/codeviz-m1)",
+  "_redLine": "Per codeviz-overview red line #2: evidence may not be empty. If the translator outputs an annotation without any evidence, fail the regression even if the label is correct.",
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:POST:/api/orders",
+  "narrative": "用户提交购物清单后,系统先用 x-user-id 识别身份,再在一个数据库事务中按顺序完成:确认买家存在 → 对每个商品校验库存并扣减 → 按下单时刻的价格快照写入订单与订单行,最后返回订单 ID、总金额与初始状态 pending。整条链路任一步失败都会让事务回滚、库存不会被实际扣走。",
+  "narrativeConfidence": "high",
+  "narrativeEvidence": [
+    "src/routes/orders.ts:15-29 (POST 路由 + requireUser 中间件 + 调用 createOrder)",
+    "src/services/order-service.ts:24-63 (createOrder 在 prisma.$transaction 中编排 user 校验 / 库存扣减 / 订单写入)",
+    "src/services/inventory-service.ts:26-69 (reserveStock 先 findUnique 校验库存,再 update 扣减,不足时抛 ConflictError)",
+    "backend/README.md §4 POST /api/orders 业务意图清单"
+  ],
+  "nodeAnnotations": [
+    {
+      "nodeId": "n2",
+      "businessLabel": "鉴权(取 x-user-id)",
+      "businessDescription": "从请求 header 中读取 x-user-id 当作买家身份;header 缺失即返回 401",
+      "confidence": "high",
+      "evidence": [
+        "src/lib/auth.ts:18 const userId = req.header(\"x-user-id\")",
+        "src/lib/auth.ts:19-21 抛 UnauthorizedError"
+      ]
+    },
+    {
+      "nodeId": "n3",
+      "businessLabel": "下单接口入口",
+      "businessDescription": "POST /api/orders 路由,接收 items[] 请求体,转交 createOrder 服务后把 201 响应回客户端",
+      "confidence": "high",
+      "evidence": [
+        "src/routes/orders.ts:15 ordersRouter.post(\"/\", requireUser, ...)",
+        "src/routes/orders.ts:20 调用 createOrder({ userId, items })",
+        "src/routes/orders.ts:24 res.status(201).json(result)"
+      ]
+    },
+    {
+      "nodeId": "n4",
+      "businessLabel": "创建订单(事务编排)",
+      "businessDescription": "在一个 Prisma 事务里串起:校验买家、扣减库存、写订单头、写订单行;任一步失败回滚所有变更",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:32 prisma.$transaction(async (tx) => { ... })",
+        "src/services/order-service.ts:24-63 函数 createOrder 主体"
+      ]
+    },
+    {
+      "nodeId": "n5",
+      "businessLabel": "校验买家存在",
+      "businessDescription": "用 userId 在事务内查 User 表,不存在则抛 NotFoundError",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:33 tx.user.findUnique({ where: { id: input.userId } })",
+        "src/services/order-service.ts:34-36 if (!user) throw new NotFoundError"
+      ]
+    },
+    {
+      "nodeId": "n6",
+      "businessLabel": "校验库存并预占",
+      "businessDescription": "对请求 items[] 中的每个商品,先校验库存 ≥ 数量(不足抛 ConflictError),再 decrement 扣减,同时返回价格快照",
+      "confidence": "high",
+      "evidence": [
+        "src/services/inventory-service.ts:26-69 reserveStock 函数主体",
+        "src/services/order-service.ts:38 调用 reserveStock(tx, input.items)"
+      ]
+    },
+    {
+      "nodeId": "n7",
+      "businessLabel": "读取商品(库存 + 价格)",
+      "businessDescription": "事务内取每个商品的当前 stock 与 price;price 用作 OrderItem 价格快照",
+      "confidence": "high",
+      "evidence": [
+        "src/services/inventory-service.ts:46 tx.product.findUnique({ where: { id: item.productId } })",
+        "src/services/inventory-service.ts:50-53 product.stock < item.quantity → ConflictError"
+      ]
+    },
+    {
+      "nodeId": "n8",
+      "businessLabel": "扣减库存",
+      "businessDescription": "把 Product.stock 按下单数量 decrement;库存不变量(≥0)靠上一步的 pre-check 保证",
+      "confidence": "high",
+      "evidence": [
+        "src/services/inventory-service.ts:56-59 tx.product.update({ data: { stock: { decrement: item.quantity } } })",
+        "backend/README.md §2 不变量 #1:库存不可为负"
+      ]
+    },
+    {
+      "nodeId": "n9",
+      "businessLabel": "写入订单头",
+      "businessDescription": "在 Order 表插一行,status 初始化为 pending,totalAmount 取自上面累加的价格快照之和",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:39-42 reduce 累加 totalAmount",
+        "src/services/order-service.ts:44-50 tx.order.create({ data: { userId, status: \"pending\", totalAmount } })"
+      ]
+    },
+    {
+      "nodeId": "n10",
+      "businessLabel": "写入订单行(价格快照)",
+      "businessDescription": "把每个商品的 (orderId, productId, quantity, unitPrice) 批量插入 OrderItem 表;unitPrice 是下单瞬间的价格,后续 Product 改价不影响历史订单",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:52-59 tx.orderItem.createMany",
+        "backend/README.md §2 不变量 #2:价格快照",
+        "prisma/schema.prisma:62 OrderItem.unitPrice 字段注释"
+      ]
+    },
+    {
+      "nodeId": "n11",
+      "businessLabel": "用户表",
+      "businessDescription": "买家身份的持久化表,只在校验阶段被读",
+      "confidence": "high",
+      "evidence": ["prisma/schema.prisma:16-23 model User"]
+    },
+    {
+      "nodeId": "n12",
+      "businessLabel": "商品表",
+      "businessDescription": "承载商品价格与库存计数器,下单链路里被读 1 次、写 1 次(每商品)",
+      "confidence": "high",
+      "evidence": [
+        "prisma/schema.prisma:28-36 model Product",
+        "prisma/schema.prisma:32 stock Int(库存计数器)"
+      ]
+    },
+    {
+      "nodeId": "n13",
+      "businessLabel": "订单表",
+      "businessDescription": "订单头,本次链路插入一行,status=pending",
+      "confidence": "high",
+      "evidence": ["prisma/schema.prisma:41-52 model Order"]
+    },
+    {
+      "nodeId": "n14",
+      "businessLabel": "订单行表",
+      "businessDescription": "订单的商品明细,本次链路批量插入 N 行(N = 请求 items 长度)",
+      "confidence": "high",
+      "evidence": ["prisma/schema.prisma:57-68 model OrderItem"]
+    },
+    {
+      "nodeId": "n15",
+      "businessLabel": "返回订单 ID 与总金额",
+      "businessDescription": "成功时返回 { orderId, totalAmount, status: \"pending\" },HTTP 状态 201",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:61 return { orderId, totalAmount, status }",
+        "src/routes/orders.ts:24 res.status(201).json(result)"
+      ]
+    }
+  ],
+  "edgeAnnotations": [
+    {
+      "edgeId": "e10",
+      "businessLabel": "扣库存(写)",
+      "confidence": "high",
+      "evidence": ["tx.product.update with stock: { decrement } at src/services/inventory-service.ts:56-59"]
+    },
+    {
+      "edgeId": "e12",
+      "businessLabel": "持久化订单头",
+      "confidence": "high",
+      "evidence": ["tx.order.create at src/services/order-service.ts:44-50"]
+    },
+    {
+      "edgeId": "e14",
+      "businessLabel": "持久化订单行(含价格快照)",
+      "confidence": "high",
+      "evidence": [
+        "tx.orderItem.createMany at src/services/order-service.ts:52-59",
+        "unitPrice 来自 reserveStock 返回的 ReservedLine.unitPrice(reserveStock 在 src/services/inventory-service.ts:64 已快照)"
+      ]
+    },
+    {
+      "edgeId": "e16",
+      "businessLabel": "返回客户端 201",
+      "confidence": "high",
+      "evidence": ["res.status(201).json(result) at src/routes/orders.ts:24"]
+    }
+  ]
+}

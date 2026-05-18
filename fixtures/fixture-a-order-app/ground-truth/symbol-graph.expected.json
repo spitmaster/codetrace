@@ -1,0 +1,451 @@
+{
+  "_comment": "Ground-truth SymbolGraph for fixture-a-order-app/backend. Used by static-code-analyzer regression. Recall target ≥ 80% on `symbols` and `calls` arrays.",
+  "_evidenceSource": "fixtures/fixture-a-order-app/backend/src/**/*.ts (commit cb14140 of feature/codeviz-m1)",
+  "schemaVersion": "0.1.0",
+  "rootPath": "fixtures/fixture-a-order-app/backend",
+  "languages": ["typescript"],
+  "frameworks": [
+    { "name": "express", "version": "4.x", "confidence": "high" },
+    { "name": "prisma", "version": "5.x", "confidence": "high" }
+  ],
+  "symbols": [
+    {
+      "id": "ts:src/app.ts#createApp",
+      "kind": "function",
+      "name": "createApp",
+      "qualifiedName": "createApp",
+      "filePath": "src/app.ts",
+      "range": { "startLine": 5, "endLine": 33 },
+      "signature": "() => express.Express",
+      "visibility": "public",
+      "tags": ["factory", "app-bootstrap"]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter",
+      "kind": "variable",
+      "name": "ordersRouter",
+      "qualifiedName": "ordersRouter",
+      "filePath": "src/routes/orders.ts",
+      "range": { "startLine": 10, "endLine": 10 },
+      "signature": "express.Router",
+      "visibility": "public",
+      "tags": ["router"]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "kind": "handler",
+      "name": "POST /",
+      "qualifiedName": "ordersRouter.post(\"/\")",
+      "filePath": "src/routes/orders.ts",
+      "range": { "startLine": 15, "endLine": 29 },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": ["async", "http-handler"]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "kind": "handler",
+      "name": "GET /",
+      "qualifiedName": "ordersRouter.get(\"/\")",
+      "filePath": "src/routes/orders.ts",
+      "range": { "startLine": 32, "endLine": 45 },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": ["async", "http-handler"]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "kind": "handler",
+      "name": "GET /:id",
+      "qualifiedName": "ordersRouter.get(\"/:id\")",
+      "filePath": "src/routes/orders.ts",
+      "range": { "startLine": 48, "endLine": 59 },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": ["async", "http-handler"]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "kind": "handler",
+      "name": "DELETE /:id",
+      "qualifiedName": "ordersRouter.delete(\"/:id\")",
+      "filePath": "src/routes/orders.ts",
+      "range": { "startLine": 62, "endLine": 73 },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": ["async", "http-handler"]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#createOrder",
+      "kind": "function",
+      "name": "createOrder",
+      "qualifiedName": "createOrder",
+      "filePath": "src/services/order-service.ts",
+      "range": { "startLine": 24, "endLine": 63 },
+      "signature": "(input: CreateOrderInput) => Promise<{ orderId, totalAmount, status }>",
+      "visibility": "public",
+      "tags": ["async", "service", "transactional"]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#listOrders",
+      "kind": "function",
+      "name": "listOrders",
+      "qualifiedName": "listOrders",
+      "filePath": "src/services/order-service.ts",
+      "range": { "startLine": 68, "endLine": 84 },
+      "signature": "(opts: ListOrdersOptions) => Promise<{ data, page, pageSize, total }>",
+      "visibility": "public",
+      "tags": ["async", "service"]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#getOrderDetail",
+      "kind": "function",
+      "name": "getOrderDetail",
+      "qualifiedName": "getOrderDetail",
+      "filePath": "src/services/order-service.ts",
+      "range": { "startLine": 89, "endLine": 105 },
+      "signature": "(userId: string, orderId: string) => Promise<Order>",
+      "visibility": "public",
+      "tags": ["async", "service"]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#cancelOrder",
+      "kind": "function",
+      "name": "cancelOrder",
+      "qualifiedName": "cancelOrder",
+      "filePath": "src/services/order-service.ts",
+      "range": { "startLine": 111, "endLine": 137 },
+      "signature": "(userId: string, orderId: string) => Promise<{ orderId, status }>",
+      "visibility": "public",
+      "tags": ["async", "service", "transactional"]
+    },
+    {
+      "id": "ts:src/services/inventory-service.ts#reserveStock",
+      "kind": "function",
+      "name": "reserveStock",
+      "qualifiedName": "reserveStock",
+      "filePath": "src/services/inventory-service.ts",
+      "range": { "startLine": 26, "endLine": 69 },
+      "signature": "(tx: Prisma.TransactionClient, items: ReserveRequestItem[]) => Promise<ReservedLine[]>",
+      "visibility": "public",
+      "tags": ["async", "service", "tx-scoped"]
+    },
+    {
+      "id": "ts:src/services/inventory-service.ts#restoreStock",
+      "kind": "function",
+      "name": "restoreStock",
+      "qualifiedName": "restoreStock",
+      "filePath": "src/services/inventory-service.ts",
+      "range": { "startLine": 74, "endLine": 84 },
+      "signature": "(tx: Prisma.TransactionClient, items: { productId, quantity }[]) => Promise<void>",
+      "visibility": "public",
+      "tags": ["async", "service", "tx-scoped"]
+    },
+    {
+      "id": "ts:src/lib/auth.ts#requireUser",
+      "kind": "function",
+      "name": "requireUser",
+      "qualifiedName": "requireUser",
+      "filePath": "src/lib/auth.ts",
+      "range": { "startLine": 17, "endLine": 24 },
+      "signature": "(req: Request, res: Response, next: NextFunction) => void",
+      "visibility": "public",
+      "tags": ["middleware", "auth"]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#HttpError",
+      "kind": "class",
+      "name": "HttpError",
+      "qualifiedName": "HttpError",
+      "filePath": "src/lib/errors.ts",
+      "range": { "startLine": 1, "endLine": 7 },
+      "visibility": "public",
+      "tags": ["error-base"]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#ValidationError",
+      "kind": "class",
+      "name": "ValidationError",
+      "qualifiedName": "ValidationError",
+      "filePath": "src/lib/errors.ts",
+      "range": { "startLine": 8, "endLine": 12 },
+      "visibility": "public",
+      "tags": ["error", "status-400"]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#UnauthorizedError",
+      "kind": "class",
+      "name": "UnauthorizedError",
+      "qualifiedName": "UnauthorizedError",
+      "filePath": "src/lib/errors.ts",
+      "range": { "startLine": 14, "endLine": 18 },
+      "visibility": "public",
+      "tags": ["error", "status-401"]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#NotFoundError",
+      "kind": "class",
+      "name": "NotFoundError",
+      "qualifiedName": "NotFoundError",
+      "filePath": "src/lib/errors.ts",
+      "range": { "startLine": 20, "endLine": 24 },
+      "visibility": "public",
+      "tags": ["error", "status-404"]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#ConflictError",
+      "kind": "class",
+      "name": "ConflictError",
+      "qualifiedName": "ConflictError",
+      "filePath": "src/lib/errors.ts",
+      "range": { "startLine": 26, "endLine": 30 },
+      "visibility": "public",
+      "tags": ["error", "status-409"]
+    },
+    {
+      "id": "ts:src/lib/prisma.ts#prisma",
+      "kind": "variable",
+      "name": "prisma",
+      "qualifiedName": "prisma",
+      "filePath": "src/lib/prisma.ts",
+      "range": { "startLine": 3, "endLine": 3 },
+      "signature": "PrismaClient",
+      "visibility": "public",
+      "tags": ["singleton", "orm-client"]
+    }
+  ],
+  "calls": [
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "calleeId": "ts:src/services/order-service.ts#createOrder",
+      "callKind": "direct",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 20 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 17 },
+      "confidence": "high",
+      "note": "middleware composition: requireUser is registered before the POST handler"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "calleeId": "ts:src/services/order-service.ts#listOrders",
+      "callKind": "direct",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 39 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 34 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "calleeId": "ts:src/services/order-service.ts#getOrderDetail",
+      "callKind": "direct",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 53 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 50 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "calleeId": "ts:src/services/order-service.ts#cancelOrder",
+      "callKind": "direct",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 67 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": { "file": "src/routes/orders.ts", "line": 64 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/services/order-service.ts#createOrder",
+      "calleeId": "ts:src/services/inventory-service.ts#reserveStock",
+      "callKind": "direct",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 38 },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/services/order-service.ts#cancelOrder",
+      "calleeId": "ts:src/services/inventory-service.ts#restoreStock",
+      "callKind": "direct",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 126 },
+      "confidence": "high"
+    }
+  ],
+  "frameworkPoints": [
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.post(\"/\", requireUser, async (req, res, next) => { ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.get(\"/\", requireUser, async (req, res, next) => { ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.get(\"/:id\", requireUser, async (req, res, next) => { ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.delete(\"/:id\", requireUser, async (req, res, next) => { ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "router-mount",
+      "raw": "app.use(\"/api/orders\", ordersRouter)"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "middleware-mount",
+      "raw": "app.use(express.json())"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "route-registration",
+      "raw": "app.get(\"/health\", ...)"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/lib/auth.ts#requireUser",
+      "meaning": "middleware-definition",
+      "raw": "function requireUser(req, _res, next) { ... }"
+    }
+  ],
+  "dataAccessPoints": [
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "target": "User",
+      "operation": "read",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 33 },
+      "raw": "tx.user.findUnique({ where: { id: input.userId } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "target": "Order",
+      "operation": "write",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 44 },
+      "raw": "tx.order.create({ data: { userId, status: \"pending\", totalAmount } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "target": "OrderItem",
+      "operation": "write",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 52 },
+      "raw": "tx.orderItem.createMany({ data: reserved.map(...) })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#listOrders",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 74 },
+      "raw": "prisma.order.findMany({ where: { userId }, orderBy: { createdAt: \"desc\" }, skip, take })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#listOrders",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 80 },
+      "raw": "prisma.order.count({ where: { userId } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#getOrderDetail",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 90 },
+      "raw": "prisma.order.findFirst({ where: { id, userId }, include: { items: { include: { product } } } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 113 },
+      "raw": "tx.order.findFirst({ where: { id, userId }, include: { items: true } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "target": "Order",
+      "operation": "write",
+      "fileLocation": { "file": "src/services/order-service.ts", "line": 131 },
+      "raw": "tx.order.update({ where: { id }, data: { status: \"cancelled\" } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "target": "Product",
+      "operation": "read",
+      "fileLocation": { "file": "src/services/inventory-service.ts", "line": 46 },
+      "raw": "tx.product.findUnique({ where: { id: item.productId } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "target": "Product",
+      "operation": "write",
+      "fileLocation": { "file": "src/services/inventory-service.ts", "line": 56 },
+      "raw": "tx.product.update({ where: { id }, data: { stock: { decrement: item.quantity } } })",
+      "confidence": "high",
+      "note": "stock decrement — inventory invariant guarded by ConflictError on insufficient stock at line 50"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/inventory-service.ts#restoreStock",
+      "target": "Product",
+      "operation": "write",
+      "fileLocation": { "file": "src/services/inventory-service.ts", "line": 79 },
+      "raw": "tx.product.update({ where: { id }, data: { stock: { increment: item.quantity } } })",
+      "confidence": "high",
+      "note": "stock increment — reverses reserveStock on cancel"
+    }
+  ]
+}

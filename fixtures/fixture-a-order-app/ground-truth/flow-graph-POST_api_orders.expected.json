@@ -1,0 +1,277 @@
+{
+  "_comment": "Ground-truth FlowGraph for POST /api/orders. Used by dataflow-tracer regression. Main-path recall target ≥ 80%: an analyzer that misses requireUser → handler → createOrder → reserveStock → product.update → tx.order.create → tx.orderItem.createMany still has the main spine intact.",
+  "_evidenceSource": "fixtures/fixture-a-order-app/backend/src/{routes/orders,services/order-service,services/inventory-service,lib/auth}.ts (commit cb14140 of feature/codeviz-m1)",
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:POST:/api/orders",
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "input",
+      "label": "request",
+      "depth": 0,
+      "metadata": {
+        "headers": ["x-user-id"],
+        "bodyShape": { "items": "{ productId, quantity }[]" }
+      }
+    },
+    {
+      "id": "n2",
+      "kind": "function",
+      "label": "requireUser",
+      "symbolId": "ts:src/lib/auth.ts#requireUser",
+      "depth": 1,
+      "metadata": { "role": "middleware" }
+    },
+    {
+      "id": "n3",
+      "kind": "function",
+      "label": "POST /api/orders handler",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "depth": 1
+    },
+    {
+      "id": "n4",
+      "kind": "function",
+      "label": "createOrder",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 2,
+      "metadata": { "role": "service", "transactional": true }
+    },
+    {
+      "id": "n5",
+      "kind": "function",
+      "label": "tx.user.findUnique",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.user.findUnique",
+        "site": { "file": "src/services/order-service.ts", "line": 33 },
+        "purpose": "buyer existence check (FK guard)"
+      }
+    },
+    {
+      "id": "n6",
+      "kind": "function",
+      "label": "reserveStock",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "depth": 3,
+      "metadata": { "role": "service", "txScoped": true }
+    },
+    {
+      "id": "n7",
+      "kind": "function",
+      "label": "tx.product.findUnique",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "depth": 4,
+      "metadata": {
+        "ormCall": "prisma.product.findUnique",
+        "site": { "file": "src/services/inventory-service.ts", "line": 46 },
+        "purpose": "stock pre-check + price snapshot"
+      }
+    },
+    {
+      "id": "n8",
+      "kind": "function",
+      "label": "tx.product.update (decrement stock)",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "depth": 4,
+      "metadata": {
+        "ormCall": "prisma.product.update",
+        "site": { "file": "src/services/inventory-service.ts", "line": 56 },
+        "purpose": "decrement stock counter",
+        "businessRule": "stock invariant: product.stock ≥ 0, enforced by ConflictError at line 50"
+      }
+    },
+    {
+      "id": "n9",
+      "kind": "function",
+      "label": "tx.order.create",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.order.create",
+        "site": { "file": "src/services/order-service.ts", "line": 44 },
+        "purpose": "persist order header (status=pending)"
+      }
+    },
+    {
+      "id": "n10",
+      "kind": "function",
+      "label": "tx.orderItem.createMany",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.orderItem.createMany",
+        "site": { "file": "src/services/order-service.ts", "line": 52 },
+        "purpose": "persist line items with unitPrice snapshot"
+      }
+    },
+    {
+      "id": "n11",
+      "kind": "table",
+      "label": "User table",
+      "depth": 4,
+      "metadata": { "model": "User", "schemaFile": "prisma/schema.prisma:16-23" }
+    },
+    {
+      "id": "n12",
+      "kind": "table",
+      "label": "Product table",
+      "depth": 5,
+      "metadata": { "model": "Product", "schemaFile": "prisma/schema.prisma:28-36" }
+    },
+    {
+      "id": "n13",
+      "kind": "table",
+      "label": "Order table",
+      "depth": 4,
+      "metadata": { "model": "Order", "schemaFile": "prisma/schema.prisma:41-52" }
+    },
+    {
+      "id": "n14",
+      "kind": "table",
+      "label": "OrderItem table",
+      "depth": 4,
+      "metadata": { "model": "OrderItem", "schemaFile": "prisma/schema.prisma:57-68" }
+    },
+    {
+      "id": "n15",
+      "kind": "response",
+      "label": "201 { orderId, totalAmount, status }",
+      "depth": 2,
+      "metadata": { "httpStatus": 201, "shape": { "orderId": "string", "totalAmount": "number (cents)", "status": "\"pending\"" } }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "n1",
+      "to": "n2",
+      "kind": "input-bind",
+      "confidence": "high",
+      "metadata": { "site": "express middleware chain in src/routes/orders.ts:17" }
+    },
+    {
+      "id": "e2",
+      "from": "n2",
+      "to": "n3",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": "express next() in src/lib/auth.ts:23" }
+    },
+    {
+      "id": "e3",
+      "from": "n3",
+      "to": "n4",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/routes/orders.ts", "line": 20 } }
+    },
+    {
+      "id": "e4",
+      "from": "n4",
+      "to": "n5",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 33 }, "txWrapper": "prisma.$transaction at line 32" }
+    },
+    {
+      "id": "e5",
+      "from": "n5",
+      "to": "n11",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": { "target": "User", "where": "{ id: input.userId }" }
+    },
+    {
+      "id": "e6",
+      "from": "n4",
+      "to": "n6",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 38 } }
+    },
+    {
+      "id": "e7",
+      "from": "n6",
+      "to": "n7",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/inventory-service.ts", "line": 46 }, "loop": "per item in items[]" }
+    },
+    {
+      "id": "e8",
+      "from": "n7",
+      "to": "n12",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": { "target": "Product", "where": "{ id: item.productId }" }
+    },
+    {
+      "id": "e9",
+      "from": "n6",
+      "to": "n8",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/inventory-service.ts", "line": 56 }, "loop": "per item in items[]" }
+    },
+    {
+      "id": "e10",
+      "from": "n8",
+      "to": "n12",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": { "target": "Product", "operation": "stock decrement", "businessRule": "inventory invariant enforced at line 50 pre-check" }
+    },
+    {
+      "id": "e11",
+      "from": "n4",
+      "to": "n9",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 44 } }
+    },
+    {
+      "id": "e12",
+      "from": "n9",
+      "to": "n13",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": { "target": "Order", "operation": "insert", "fields": ["userId", "status", "totalAmount"] }
+    },
+    {
+      "id": "e13",
+      "from": "n4",
+      "to": "n10",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 52 } }
+    },
+    {
+      "id": "e14",
+      "from": "n10",
+      "to": "n14",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": { "target": "OrderItem", "operation": "bulk-insert", "fields": ["orderId", "productId", "quantity", "unitPrice"], "note": "unitPrice is price snapshot from reserveStock" }
+    },
+    {
+      "id": "e15",
+      "from": "n4",
+      "to": "n15",
+      "kind": "return",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/services/order-service.ts", "line": 61 } }
+    },
+    {
+      "id": "e16",
+      "from": "n3",
+      "to": "n15",
+      "kind": "return",
+      "confidence": "high",
+      "metadata": { "site": { "file": "src/routes/orders.ts", "line": 24 }, "httpStatus": 201 }
+    }
+  ],
+  "cycles": [],
+  "truncations": []
+}

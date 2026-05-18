@@ -1,0 +1,10 @@
+{
+  "name": "codetrace",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Code-visualization reader (codeviz). M1.1 root — currently only exposes fixture / schema scripts; cli + web workspaces will be wired in from M1.2.",
+  "scripts": {
+    "fixture:health": "bash fixtures/fixture-a-order-app/scripts/health-check.sh",
+    "validate:ground-truth": "npm --prefix cli run validate:ground-truth"
+  }
+}
