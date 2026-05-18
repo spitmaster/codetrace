@@ -2,18 +2,29 @@
   "name": "@codeviz/cli",
   "version": "0.1.0",
   "private": true,
-  "description": "Codeviz CLI — analyze a target project and emit SymbolGraph / IOEntryRegistry / FlowGraph / BusinessAnnotations JSON. M1.1 ships only the zod schemas; the analyzer/tracer/translator implementations land in M1.2 – M1.4.",
+  "description": "Codeviz CLI — analyze a target project and emit SymbolGraph / IOEntryRegistry / FlowGraph / BusinessAnnotations JSON. M1.2 ships analyzer + io-mapper; tracer/translator land in M1.3 – M1.4.",
   "type": "commonjs",
+  "bin": {
+    "codeviz": "dist/index.js"
+  },
   "scripts": {
     "build": "tsc -p .",
+    "start": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "analyze": "tsx src/index.ts analyze",
+    "map-io": "tsx src/index.ts map-io",
+    "trace": "tsx src/index.ts trace",
     "validate:ground-truth": "tsx src/schemas/validate-ground-truth.ts"
   },
   "dependencies": {
+    "ts-morph": "^23.0.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
   }
 }

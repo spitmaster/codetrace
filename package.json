@@ -5,6 +5,10 @@
   "description": "Code-visualization reader (codeviz). M1.1 root — currently only exposes fixture / schema scripts; cli + web workspaces will be wired in from M1.2.",
   "scripts": {
     "fixture:health": "bash fixtures/fixture-a-order-app/scripts/health-check.sh",
-    "validate:ground-truth": "npm --prefix cli run validate:ground-truth"
+    "validate:ground-truth": "npm --prefix cli run validate:ground-truth",
+    "cli:test": "npm --prefix cli run test",
+    "cli:analyze": "npm --prefix cli run analyze --",
+    "cli:map-io": "npm --prefix cli run map-io --",
+    "cli:trace": "npm --prefix cli run trace --"
   }
 }
