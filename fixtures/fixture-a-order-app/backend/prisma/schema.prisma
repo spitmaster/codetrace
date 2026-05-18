@@ -1,0 +1,68 @@
+// Fixture-A — Order System (M1)
+// 4 tables / 4 endpoints / 1 inventory invariant.
+// Business intent lives in backend/README.md (ground-truth source for BusinessAnnotations).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// --- User: buyer identity ------------------------------------------------
+// M1 fake auth: client sends `x-user-id` header; backend trusts it as the buyer.
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+
+  orders Order[]
+}
+
+// --- Product: catalog row with inventory counter -------------------------
+// `stock` is the inventory invariant: must never go negative.
+// `price` is captured into OrderItem.unitPrice at order-time (price snapshot).
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  price     Int      // cents, to avoid float precision drift
+  stock     Int
+  createdAt DateTime @default(now())
+
+  items OrderItem[]
+}
+
+// --- Order: header row ---------------------------------------------------
+// State machine: pending → paid (out of M1 scope) ; pending → cancelled (DELETE endpoint).
+// `totalAmount` is computed at create-time from item snapshots.
+model Order {
+  id          String      @id @default(cuid())
+  userId      String
+  status      String      // "pending" | "paid" | "cancelled"
+  totalAmount Int         // cents
+  createdAt   DateTime    @default(now())
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+
+  @@index([userId, createdAt])
+}
+
+// --- OrderItem: line item with price snapshot ----------------------------
+// `unitPrice` snapshots Product.price at the moment the order was created,
+// so later price changes do not alter historical orders.
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  unitPrice Int    // cents, snapshot of Product.price at order-time
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
