@@ -25,34 +25,69 @@ import {
 } from "@xyflow/react";
 import { FlowNodeView } from "./FlowNode";
 import { layout } from "./layout";
-import { loadEntryBundle, loadRegistry, type BundleForEntry } from "./dataLoader";
+import {
+  HttpStatusError,
+  loadEntryBundle,
+  loadRegistry,
+  parseEntryId,
+  type BundleForEntry,
+} from "./dataLoader";
 import type { IOEntry, IOEntryRegistry } from "./types";
 
 const nodeTypes = { flow: FlowNodeView };
 
+/** Pull method/path from id when the IOEntry didn't include them at top-level. */
+function entryMethod(e: IOEntry): string {
+  return e.method ?? parseEntryId(e.id)?.method ?? "?";
+}
+function entryPath(e: IOEntry): string {
+  return e.path ?? parseEntryId(e.id)?.path ?? e.id;
+}
+
 export function App(): JSX.Element {
   const [registry, setRegistry] = useState<IOEntryRegistry | null>(null);
   const [bundle, setBundle] = useState<BundleForEntry | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  /** Fatal error — e.g. the registry itself couldn't load. */
+  const [fatalError, setFatalError] = useState<string | null>(null);
+  /** Per-entry error — e.g. selected entry had no flow-graph file. */
+  const [entryError, setEntryError] = useState<{ entryId: string; status?: number; msg: string } | null>(null);
+  /** Entries we've discovered as 404 — left rail dims them. */
+  const [missingEntries, setMissingEntries] = useState<Set<string>>(new Set());
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadRegistry().then(setRegistry).catch((e) => setError(String(e)));
+    loadRegistry().then(setRegistry).catch((e) => setFatalError(String(e)));
   }, []);
 
   const selectEntry = (e: IOEntry) => {
     setBundle(null);
+    setEntryError(null);
     setSelectedNodeId(null);
-    loadEntryBundle(e).then(setBundle).catch((err) => setError(String(err)));
+    loadEntryBundle(e)
+      .then(setBundle)
+      .catch((err) => {
+        if (err instanceof HttpStatusError) {
+          setEntryError({ entryId: e.id, status: err.status, msg: err.message });
+          if (err.status === 404) {
+            setMissingEntries((prev) => {
+              const next = new Set(prev);
+              next.add(e.id);
+              return next;
+            });
+          }
+        } else {
+          setEntryError({ entryId: e.id, msg: String(err) });
+        }
+      });
   };
 
-  // Auto-select first entry on registry load for nicer first-paint.
+  // Auto-select first entry that hasn't been marked missing yet, on registry load.
   useEffect(() => {
-    if (registry && !bundle && registry.entries.length > 0) {
-      selectEntry(registry.entries[0]);
-    }
+    if (!registry || bundle) return;
+    const candidate = registry.entries.find((e) => !missingEntries.has(e.id));
+    if (candidate) selectEntry(candidate);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [registry]);
+  }, [registry, missingEntries]);
 
   const flowGraph = bundle?.flow;
   const annotations = bundle?.annotations;
@@ -157,15 +192,19 @@ export function App(): JSX.Element {
               IO 入口 ({registry?.entries.length ?? 0})
             </div>
           </div>
-          {error && (
-            <div style={{ padding: 16, color: "#dc2626", fontSize: 12 }}>{error}</div>
+          {fatalError && (
+            <div style={{ padding: 16, color: "#dc2626", fontSize: 12 }}>{fatalError}</div>
           )}
           {registry?.entries.map((e) => {
             const isSel = bundle?.entry.id === e.id;
+            const isMissing = missingEntries.has(e.id);
+            const method = entryMethod(e);
+            const path = entryPath(e);
             return (
               <button
                 key={e.id}
                 onClick={() => selectEntry(e)}
+                title={isMissing ? "本入口在当前 e2e 输出中没有 flow-graph(可能是运维入口,e2e 只跑业务入口)" : undefined}
                 style={{
                   display: "block",
                   width: "100%",
@@ -176,16 +215,16 @@ export function App(): JSX.Element {
                   borderLeft: isSel ? "3px solid #3b82f6" : "3px solid transparent",
                   cursor: "pointer",
                   fontFamily: "inherit",
+                  opacity: isMissing ? 0.45 : 1,
                 }}
               >
                 <div style={{ fontSize: 13, color: "#0f172a", fontWeight: isSel ? 600 : 500 }}>
-                  <code style={{ color: methodColor(e.method), fontSize: 12 }}>
-                    {e.method}
-                  </code>{" "}
-                  {e.path}
+                  <code style={{ color: methodColor(method), fontSize: 12 }}>{method}</code>{" "}
+                  {path}
                 </div>
                 <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
                   {e.displayName}
+                  {isMissing && <span style={{ marginLeft: 6, color: "#94a3b8" }}>(无数据)</span>}
                 </div>
               </button>
             );
@@ -209,6 +248,19 @@ export function App(): JSX.Element {
               <Controls />
               <MiniMap pannable zoomable nodeColor={(n) => miniColor(n)} />
             </ReactFlow>
+          ) : entryError ? (
+            <div style={{ padding: 32, maxWidth: 560 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "#0f172a", marginBottom: 8 }}>
+                该入口暂无可视化数据
+              </div>
+              <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6, marginBottom: 12 }}>
+                <code style={{ background: "#f1f5f9", padding: "2px 6px", borderRadius: 4 }}>{entryError.entryId}</code>{" "}
+                {entryError.status === 404
+                  ? "在 reports/m1-out/ 下没有对应的 flow-graph 文件。M1 e2e 默认只跑 4 个业务入口(POST/GET列/GET详情/DELETE),运维入口(如 /health)被跳过。"
+                  : entryError.msg}
+              </div>
+              <div style={{ fontSize: 12, color: "#94a3b8" }}>请从左侧选择其他业务入口(高亮项)。</div>
+            </div>
           ) : (
             <div style={{ padding: 32, color: "#64748b" }}>选择左侧入口以渲染流图……</div>
           )}

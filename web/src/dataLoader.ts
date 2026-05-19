@@ -26,17 +26,42 @@ export interface BundleForEntry {
   annotations: BusinessAnnotations;
 }
 
+/**
+ * Parse the canonical `io:<proto>:<method>:<path>` id format. This is the
+ * source of truth — `entry.method` / `entry.path` are NOT top-level fields in
+ * the schema 0.1.0 IOEntry (they live in `metadata.httpMethod` / `metadata.path`
+ * and there's no contract that they're always present). The id is.
+ *
+ * Examples:
+ *   io:http:POST:/api/orders     → { method: "POST", path: "/api/orders" }
+ *   io:http:GET:/api/orders/:id  → { method: "GET",  path: "/api/orders/:id" }
+ *   io:http:GET:/health          → { method: "GET",  path: "/health" }
+ */
+export function parseEntryId(id: string): { method: string; path: string } | null {
+  const m = id.match(/^io:[^:]+:([^:]+):(.+)$/);
+  if (!m) return null;
+  return { method: m[1], path: m[2] };
+}
+
 export function entryToSlug(entry: IOEntry): string {
-  // io:http:POST:/api/orders → POST_api_orders
-  const method = entry.method ?? "ANY";
-  const path = (entry.path ?? "/").replace(/^\//, "").replace(/[\/:]/g, "_");
-  return `${method}_${path}`;
+  // POST_api_orders, GET_health, GET_api_orders_id, etc.
+  const parsed = parseEntryId(entry.id);
+  if (!parsed) return "UNKNOWN";
+  const path = parsed.path.replace(/^\//, "").replace(/[\/:]/g, "_");
+  return `${parsed.method}_${path}`;
+}
+
+export class HttpStatusError extends Error {
+  constructor(public readonly path: string, public readonly status: number) {
+    super(`fetch ${path}: HTTP ${status}`);
+    this.name = "HttpStatusError";
+  }
 }
 
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(path, { headers: { accept: "application/json" } });
   if (!res.ok) {
-    throw new Error(`fetch ${path}: HTTP ${res.status}`);
+    throw new HttpStatusError(path, res.status);
   }
   return res.json() as Promise<T>;
 }
