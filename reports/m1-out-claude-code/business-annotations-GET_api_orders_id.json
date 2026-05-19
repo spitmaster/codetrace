@@ -1,0 +1,210 @@
+{
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:GET:/api/orders/:id",
+  "narrative": "请求带着 x-user-id 头和路径参数 id 进入接口,先经 requireUser 中间件完成用户身份校验。校验通过后由 GET /api/orders/:id 处理器接管,委派 getOrderDetail 服务编排订单详情查询。该服务依次读取订单主表、订单行表和商品表,拼装出完整订单数据。最终以 HTTP 200 将订单详情返回给调用方。",
+  "narrativeConfidence": "high",
+  "narrativeEvidence": [
+    "headers: x-user-id",
+    "pathParams: id",
+    "symbolId: ts:src/lib/auth.ts#requireUser",
+    "symbolId: ts:src/routes/orders.ts#ordersRouter.get:/:id",
+    "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+    "ormCall: prisma.order.findFirst",
+    "ormCall: prisma.orderitem.findFirst",
+    "ormCall: prisma.product.findFirst",
+    "httpMethod: GET"
+  ],
+  "nodeAnnotations": [
+    {
+      "nodeId": "n1",
+      "businessLabel": "订单详情请求入参",
+      "businessDescription": "携带 x-user-id 与路径参数 id 的查询请求",
+      "confidence": "high",
+      "evidence": [
+        "headers: x-user-id",
+        "pathParams: id"
+      ]
+    },
+    {
+      "nodeId": "n2",
+      "businessLabel": "用户鉴权中间件",
+      "businessDescription": "校验 x-user-id 完成用户身份鉴权",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/lib/auth.ts#requireUser",
+        "role: middleware"
+      ]
+    },
+    {
+      "nodeId": "n3",
+      "businessLabel": "GET /api/orders/:id 接口入口",
+      "businessDescription": "订单详情接口的 HTTP 入口处理器",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/routes/orders.ts#ordersRouter.get:/:id",
+        "kind: handler"
+      ]
+    },
+    {
+      "nodeId": "n4",
+      "businessLabel": "订单详情服务",
+      "businessDescription": "编排订单、订单行、商品的查询装配",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "kind: function"
+      ]
+    },
+    {
+      "nodeId": "n5",
+      "businessLabel": "查订单主记录",
+      "businessDescription": "Prisma findFirst 读取 Order 表订单主记录",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "src/services/order-service.ts:90",
+        "ormCall: prisma.order.findFirst"
+      ]
+    },
+    {
+      "nodeId": "n6",
+      "businessLabel": "订单表",
+      "businessDescription": "Order 数据表",
+      "confidence": "high",
+      "evidence": [
+        "model: Order"
+      ]
+    },
+    {
+      "nodeId": "n7",
+      "businessLabel": "查订单行",
+      "businessDescription": "Prisma findFirst 读取 OrderItem 订单行数据",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "src/services/order-service.ts:90",
+        "ormCall: prisma.orderitem.findFirst"
+      ]
+    },
+    {
+      "nodeId": "n8",
+      "businessLabel": "订单行表",
+      "businessDescription": "OrderItem 数据表",
+      "confidence": "high",
+      "evidence": [
+        "model: OrderItem"
+      ]
+    },
+    {
+      "nodeId": "n9",
+      "businessLabel": "查商品信息",
+      "businessDescription": "Prisma findFirst 读取 Product 商品记录",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "src/services/order-service.ts:90",
+        "ormCall: prisma.product.findFirst"
+      ]
+    },
+    {
+      "nodeId": "n10",
+      "businessLabel": "商品表",
+      "businessDescription": "Product 数据表",
+      "confidence": "high",
+      "evidence": [
+        "model: Product"
+      ]
+    },
+    {
+      "nodeId": "n11",
+      "businessLabel": "200 成功响应",
+      "businessDescription": "以 HTTP 200 返回订单详情",
+      "confidence": "high",
+      "evidence": [
+        "httpMethod: GET"
+      ]
+    }
+  ],
+  "edgeAnnotations": [
+    {
+      "edgeId": "e1",
+      "businessLabel": "请求进入鉴权",
+      "confidence": "low",
+      "evidence": [
+        "(no evidence — placeholder)"
+      ]
+    },
+    {
+      "edgeId": "e2",
+      "businessLabel": "鉴权后转入处理",
+      "confidence": "low",
+      "evidence": [
+        "(no evidence — placeholder)"
+      ]
+    },
+    {
+      "edgeId": "e3",
+      "businessLabel": "调用订单详情服务",
+      "confidence": "high",
+      "evidence": [
+        "src/routes/orders.ts:53"
+      ]
+    },
+    {
+      "edgeId": "e4",
+      "businessLabel": "查询订单主表",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:90"
+      ]
+    },
+    {
+      "edgeId": "e5",
+      "businessLabel": "读订单表",
+      "confidence": "high",
+      "evidence": [
+        "target: Order"
+      ]
+    },
+    {
+      "edgeId": "e6",
+      "businessLabel": "查询订单行",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:90"
+      ]
+    },
+    {
+      "edgeId": "e7",
+      "businessLabel": "读订单行表",
+      "confidence": "high",
+      "evidence": [
+        "target: OrderItem"
+      ]
+    },
+    {
+      "edgeId": "e8",
+      "businessLabel": "查询商品信息",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:90"
+      ]
+    },
+    {
+      "edgeId": "e9",
+      "businessLabel": "读商品表",
+      "confidence": "high",
+      "evidence": [
+        "target: Product"
+      ]
+    },
+    {
+      "edgeId": "e10",
+      "businessLabel": "返回订单详情",
+      "confidence": "low",
+      "evidence": [
+        "(no evidence — placeholder)"
+      ]
+    }
+  ]
+}

@@ -29,6 +29,10 @@ import { mapEntries } from "../io-mapper";
 import { trace } from "../tracer";
 import {
   MockProvider,
+  ClaudeProvider,
+  OllamaProvider,
+  ClaudeCodeProvider,
+  LLMProvider,
   translate as runTranslate,
 } from "../translator";
 import {
@@ -70,6 +74,7 @@ interface E2EOptions {
   groundTruthDir: string;
   outDir: string;
   reportFile: string;
+  provider: LLMProvider;
 }
 
 function readJson(p: string): unknown {
@@ -105,7 +110,7 @@ async function runPipeline(opts: E2EOptions): Promise<FullReport> {
   const ioReport = evaluateIOEntryRegistry(gtIO, ioRegistry);
 
   // ---- 3) Per-entry: trace + translate --------------------------------
-  const provider = new MockProvider();
+  const provider = opts.provider;
   const flowReports: FlowGraphReport[] = [];
   const businessPerEntry: PerEntryReport[] = [];
   for (const e of ENTRY_SLUGS) {
@@ -140,13 +145,14 @@ function flag(ok: boolean): string {
   return ok ? "PASS" : "MISS";
 }
 
-function renderReport(r: FullReport): string {
+function renderReport(r: FullReport, providerId: string): string {
   const lines: string[] = [];
   lines.push("# M1 端到端准确率报告");
   lines.push("");
-  lines.push("> 自动生成 by `npm run e2e:m1`。Provider = mock(确定性、离线、无 LLM)。");
+  lines.push(`> 自动生成 by \`npm run e2e:m1\`。Provider = **${providerId}**。`);
   lines.push(
-    "> Provider 切换:`npm run e2e:m1 -- --provider claude` 需要 ANTHROPIC_API_KEY。"
+    "> Provider 切换:`npm run e2e:m1 -- --provider <mock|claude|ollama|claude-code>`。" +
+      "claude 需要 ANTHROPIC_API_KEY;claude-code 复用本机 `claude` CLI 的 OAuth/订阅。"
   );
   lines.push(`> 生成时间: ${new Date().toISOString()}`);
   lines.push("");
@@ -212,7 +218,20 @@ function renderReport(r: FullReport): string {
 
   // ---------------- BusinessAnnotations ----------------
   const ba = r.businessAnnotations;
-  lines.push("## 4. BusinessAnnotations 准确率(SPEC §7 人工评估 ≥ 80%;此处为 mock 自动近似)");
+  // Output-dir reminder: e2e.ts writes per-provider subdirs since 2026-05-19
+  // (previously a follow-up mock run would silently overwrite real-LLM JSONs).
+  //   mock        -> reports/m1-out/
+  //   claude-code -> reports/m1-out-claude-code/
+  //   <other>     -> reports/m1-out-<provider>/
+  // Two providers' artefacts can therefore co-exist for side-by-side review.
+  lines.push("> **产出目录约定**(2026-05-19 起):");
+  lines.push(">");
+  lines.push("> - `mock` provider 的 JSON 写到 `reports/m1-out/`(CI / web 默认路径)。");
+  lines.push("> - 其他 provider 写到 `reports/m1-out-<provider>/`,如 `reports/m1-out-claude-code/`。");
+  lines.push("> - 想强制覆盖路径用 `--out-dir <path>`。");
+  lines.push("> - 这样真实 LLM 的输出不会被后续一次 mock 跑悄悄覆盖。");
+  lines.push("");
+  lines.push(`## 4. BusinessAnnotations 准确率(SPEC §7 人工评估 ≥ 80%;provider = \`${providerId}\`)`);
   lines.push("");
   lines.push(`| Entry | nodeCov | labelMatch | edgeLabelMatch | evidenceNonEmpty | high+medium 比例 |`);
   lines.push(`|---|---|---|---|---|---|`);
@@ -229,8 +248,12 @@ function renderReport(r: FullReport): string {
   lines.push(`平均 high+medium 比例 = **${pct(ba.avgHighMediumRate)}**`);
   lines.push(`80% 双门槛(labelMatch ≥ 80% AND high+medium ≥ 80%): ${flag(ba.meetsBusinessAnnotations80)}`);
   lines.push("");
-  lines.push("> Mock provider 是规则引擎,不是 LLM。labelMatch 命中率反映规则覆盖,非\"业务理解\"准确率;");
-  lines.push("> 真正的 ≥ 80% 业务翻译质量需 ClaudeProvider + 人工评估,落地于 M1.4 真实 LLM 跑通后。");
+  if (providerId === "mock") {
+    lines.push("> Mock provider 是规则引擎,不是 LLM。labelMatch 命中率反映规则覆盖,非\"业务理解\"准确率;");
+    lines.push("> 真正的 ≥ 80% 业务翻译质量需真实 LLM provider(claude / claude-code / ollama) + 人工评估。");
+  } else {
+    lines.push(`> Provider = \`${providerId}\`,这是真实 LLM 输出。SPEC §7 的 80% 双门槛在此 provider 下生效。`);
+  }
   lines.push("");
   // Show worst labelMatch entries for debugging.
   for (const p of ba.perEntry) {
@@ -254,19 +277,104 @@ function renderReport(r: FullReport): string {
   lines.push(`| SymbolGraph 召回 | ≥ 80% | ${pct(sg.recall)} | ${flag(sgPass)} |`);
   lines.push(`| IOEntryRegistry 准确 | = 100% | ${pct(io.accuracy)} | ${flag(ioPass)} |`);
   lines.push(`| FlowGraph 主路径覆盖 | ≥ 80% | ${pct(avgFlowNode)} | ${flag(flowPass)} |`);
-  lines.push(`| BusinessAnnotations(mock 自动近似) | ≥ 80% | ${pct(ba.avgLabelMatchRate)} | ${flag(ba.meetsBusinessAnnotations80)} (不阻塞 M1 退出 — 需真实 LLM) |`);
+  lines.push(`| BusinessAnnotations(provider = ${providerId}) | ≥ 80% | ${pct(ba.avgLabelMatchRate)} | ${flag(ba.meetsBusinessAnnotations80)} ${providerId === "mock" ? "(不阻塞 M1 退出 — 需真实 LLM)" : ""} |`);
   lines.push("");
   lines.push(`**整体(SymbolGraph / IO / FlowGraph 三项 hard requirement)**: ${flag(allMustPass)}`);
   return lines.join("\n") + "\n";
 }
 
+interface ParsedArgs {
+  projectRoot?: string;
+  providerId: string;
+  outDir?: string;
+}
+
+function parseArgs(argv: string[]): ParsedArgs {
+  // Accept either `npm run e2e:m1 -- <projectRoot>` (legacy positional) or
+  // `npm run e2e:m1 -- --provider <id>` (M1.4 addition). Flags can be
+  // interleaved in any order; unknown flags throw early to keep typos loud.
+  //
+  // --out-dir <path> (optional) overrides the default outDir derivation.
+  // Default derivation:
+  //   mock         -> reports/m1-out/             (CI-friendly, web defaults here)
+  //   <other>      -> reports/m1-out-<provider>/  (avoids real-LLM output being
+  //                                                overwritten by a subsequent
+  //                                                mock run — bug fixed 2026-05-19)
+  const out: ParsedArgs = { providerId: "mock" };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--provider") {
+      const v = argv[++i];
+      if (!v) throw new Error("--provider needs a value (mock|claude|ollama|claude-code)");
+      out.providerId = v;
+    } else if (a.startsWith("--provider=")) {
+      out.providerId = a.slice("--provider=".length);
+    } else if (a === "--out-dir") {
+      const v = argv[++i];
+      if (!v) throw new Error("--out-dir needs a value (a directory path)");
+      out.outDir = v;
+    } else if (a.startsWith("--out-dir=")) {
+      out.outDir = a.slice("--out-dir=".length);
+    } else if (a.startsWith("--")) {
+      throw new Error(`unknown flag: ${a}`);
+    } else if (!out.projectRoot) {
+      out.projectRoot = a;
+    } else {
+      throw new Error(`unexpected positional argument: ${a}`);
+    }
+  }
+  return out;
+}
+
+/**
+ * Derive output directory from provider id when user didn't override.
+ *
+ * - `mock` keeps the historical `reports/m1-out/` path so web/ and CI can stay
+ *   unchanged and always see a fresh-ish mock output.
+ * - Every other provider gets its own subdir so a subsequent mock run can't
+ *   silently overwrite real-LLM JSONs (which cost real money/quota + minutes
+ *   to regenerate).
+ */
+function deriveOutDir(providerId: string, override?: string): string {
+  if (override) return resolve(override);
+  const repoRoot = resolve(__dirname, "../../..");
+  if (providerId === "mock") {
+    return resolve(repoRoot, "reports/m1-out");
+  }
+  return resolve(repoRoot, `reports/m1-out-${providerId}`);
+}
+
+function buildProvider(id: string): LLMProvider {
+  switch (id) {
+    case "mock":
+      return new MockProvider();
+    case "claude":
+      return new ClaudeProvider();
+    case "ollama":
+      return new OllamaProvider();
+    case "claude-code":
+      return new ClaudeCodeProvider();
+    default:
+      throw new Error(
+        `unknown --provider "${id}"; supported: mock | claude | ollama | claude-code`
+      );
+  }
+}
+
 async function main(): Promise<void> {
-  const projectRoot = process.argv[2] ?? resolve(__dirname, "../../../fixtures/fixture-a-order-app/backend");
+  const parsed = parseArgs(process.argv.slice(2));
+  const projectRoot =
+    parsed.projectRoot ?? resolve(__dirname, "../../../fixtures/fixture-a-order-app/backend");
   const groundTruthDir = resolve(projectRoot, "..", "ground-truth");
-  const outDir = resolve(__dirname, "../../../reports/m1-out");
+  const outDir = deriveOutDir(parsed.providerId, parsed.outDir);
   const reportFile = resolve(__dirname, "../../../reports/m1-accuracy.md");
-  const report = await runPipeline({ projectRoot, groundTruthDir, outDir, reportFile });
-  const md = renderReport(report);
+  const provider = buildProvider(parsed.providerId);
+  // eslint-disable-next-line no-console
+  console.log(`[e2e] provider = ${parsed.providerId}`);
+  // eslint-disable-next-line no-console
+  console.log(`[e2e] outDir   = ${outDir}`);
+  const report = await runPipeline({ projectRoot, groundTruthDir, outDir, reportFile, provider });
+  const md = renderReport(report, parsed.providerId);
   if (!existsSync(dirname(reportFile))) mkdirSync(dirname(reportFile), { recursive: true });
   writeFileSync(reportFile, md, "utf8");
   // eslint-disable-next-line no-console

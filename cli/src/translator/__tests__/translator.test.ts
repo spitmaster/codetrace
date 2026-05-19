@@ -134,12 +134,13 @@ describe("MockProvider — offline business-translator", () => {
 });
 
 describe("Provider abstraction (SPEC §M1 功能 4)", () => {
-  it("defaultRegistry exposes mock + claude + ollama", () => {
+  it("defaultRegistry exposes mock + claude + ollama + claude-code", () => {
     const r = defaultRegistry();
-    expect(r.list().sort()).toEqual(["claude", "mock", "ollama"]);
+    expect(r.list().sort()).toEqual(["claude", "claude-code", "mock", "ollama"]);
     expect(r.get("mock").id).toBe("mock");
     expect(r.get("claude").id).toBe("claude");
     expect(r.get("ollama").id).toBe("ollama");
+    expect(r.get("claude-code").id).toBe("claude-code");
   });
 
   it("ClaudeProvider throws clear error if no API key + no client injected", async () => {

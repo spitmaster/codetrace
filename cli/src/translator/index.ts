@@ -24,24 +24,35 @@ import { LLMProvider, ProviderRegistry, TranslateRequest, makeProviderRegistry }
 import { MockProvider } from "./providers/mock";
 import { ClaudeProvider } from "./providers/claude";
 import { OllamaProvider } from "./providers/ollama";
+import { ClaudeCodeProvider } from "./providers/claude-code";
 
 export type { LLMProvider, ProviderRegistry, TranslateRequest } from "./provider";
 export { makeProviderRegistry } from "./provider";
 export { MockProvider } from "./providers/mock";
 export { ClaudeProvider } from "./providers/claude";
 export { OllamaProvider } from "./providers/ollama";
+export { ClaudeCodeProvider } from "./providers/claude-code";
 export { buildClaudePrompt, buildOllamaPrompt, PROMPT_VERSION } from "./prompt";
 
 /**
- * Default registry: mock + claude + ollama. Caller can build their own with
- * makeProviderRegistry([...]) if they need a custom configuration (e.g.
- * test-only client injection on ClaudeProvider).
+ * Default registry: mock + claude + ollama + claude-code. Caller can build
+ * their own with makeProviderRegistry([...]) if they need a custom
+ * configuration (e.g. test-only spawn injection on ClaudeCodeProvider).
+ *
+ * Provider selection (highest-level summary, full table in
+ * cli/src/translator/providers/README.md):
+ *   - mock         — offline, deterministic, CI default
+ *   - claude       — Anthropic API (requires ANTHROPIC_API_KEY)
+ *   - ollama       — local model, free, lower quality
+ *   - claude-code  — drives local `claude` CLI; reuses user's OAuth/sub
+ *                    (no API key needed; consumes subscription quota)
  */
 export function defaultRegistry(): ProviderRegistry {
   return makeProviderRegistry([
     new MockProvider(),
     new ClaudeProvider(),
     new OllamaProvider(),
+    new ClaudeCodeProvider(),
   ]);
 }
 

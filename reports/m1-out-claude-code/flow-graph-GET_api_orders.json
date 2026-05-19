@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:GET:/api/orders",
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "input",
+      "label": "request",
+      "depth": 0,
+      "metadata": {
+        "headers": [
+          "x-user-id"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "kind": "function",
+      "label": "requireUser",
+      "symbolId": "ts:src/lib/auth.ts#requireUser",
+      "depth": 1,
+      "metadata": {
+        "role": "middleware"
+      }
+    },
+    {
+      "id": "n3",
+      "kind": "function",
+      "label": "GET /api/orders handler",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "depth": 1,
+      "metadata": {
+        "kind": "handler"
+      }
+    },
+    {
+      "id": "n4",
+      "kind": "function",
+      "label": "listOrders",
+      "symbolId": "ts:src/services/order-service.ts#listOrders",
+      "depth": 2,
+      "metadata": {
+        "kind": "function"
+      }
+    },
+    {
+      "id": "n5",
+      "kind": "function",
+      "label": "prisma.order.findMany",
+      "symbolId": "ts:src/services/order-service.ts#listOrders",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.order.findMany",
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 74
+        },
+        "operation": "read"
+      }
+    },
+    {
+      "id": "n6",
+      "kind": "table",
+      "label": "Order table",
+      "depth": 4,
+      "metadata": {
+        "model": "Order"
+      }
+    },
+    {
+      "id": "n7",
+      "kind": "function",
+      "label": "prisma.order.count",
+      "symbolId": "ts:src/services/order-service.ts#listOrders",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.order.count",
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 80
+        },
+        "operation": "read"
+      }
+    },
+    {
+      "id": "n8",
+      "kind": "response",
+      "label": "200 ok",
+      "depth": 2,
+      "metadata": {
+        "httpMethod": "GET"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "n1",
+      "to": "n2",
+      "kind": "input-bind",
+      "confidence": "high"
+    },
+    {
+      "id": "e2",
+      "from": "n2",
+      "to": "n3",
+      "kind": "call",
+      "confidence": "high"
+    },
+    {
+      "id": "e3",
+      "from": "n3",
+      "to": "n4",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/routes/orders.ts",
+          "line": 39
+        }
+      }
+    },
+    {
+      "id": "e4",
+      "from": "n4",
+      "to": "n5",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 74
+        }
+      }
+    },
+    {
+      "id": "e5",
+      "from": "n5",
+      "to": "n6",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "Order"
+      }
+    },
+    {
+      "id": "e6",
+      "from": "n4",
+      "to": "n7",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 80
+        }
+      }
+    },
+    {
+      "id": "e7",
+      "from": "n7",
+      "to": "n6",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "Order"
+      }
+    },
+    {
+      "id": "e8",
+      "from": "n3",
+      "to": "n8",
+      "kind": "return",
+      "confidence": "high"
+    }
+  ],
+  "cycles": [],
+  "truncations": []
+}
