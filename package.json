@@ -14,6 +14,9 @@
     "e2e:m1": "npm --prefix cli run e2e:m1",
     "web:install": "npm --prefix web install",
     "web:dev": "npm --prefix web run dev",
-    "web:build": "npm --prefix web run build"
+    "web:build": "npm --prefix web run build",
+    "start": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/start.ps1",
+    "start:claude-code": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/start.ps1 -Provider claude-code",
+    "start:web-only": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/start.ps1 -WebOnly"
   }
 }
