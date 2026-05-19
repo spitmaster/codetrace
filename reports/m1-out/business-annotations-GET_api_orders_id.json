@@ -1,0 +1,207 @@
+{
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:GET:/api/orders/:id",
+  "narrative": "用户调用 GET /api/orders/:id 接口。请求先经过鉴权中间件校验 x-user-id;期间会读取订单表、读取订单行表、读取商品表;最终把结果返回客户端。",
+  "narrativeConfidence": "medium",
+  "narrativeEvidence": [
+    "headers: x-user-id",
+    "pathParams: id",
+    "symbolId: ts:src/lib/auth.ts#requireUser",
+    "role: middleware",
+    "symbolId: ts:src/routes/orders.ts#ordersRouter.get:/:id",
+    "kind: handler",
+    "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+    "kind: function"
+  ],
+  "nodeAnnotations": [
+    {
+      "nodeId": "n1",
+      "businessLabel": "请求入口",
+      "businessDescription": "外部请求进入系统的入口",
+      "confidence": "high",
+      "evidence": [
+        "headers: x-user-id",
+        "pathParams: id"
+      ]
+    },
+    {
+      "nodeId": "n2",
+      "businessLabel": "鉴权",
+      "businessDescription": "校验 x-user-id,缺失则 401",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/lib/auth.ts#requireUser",
+        "role: middleware"
+      ]
+    },
+    {
+      "nodeId": "n3",
+      "businessLabel": "GET /api/orders/:id 接口入口",
+      "businessDescription": "HTTP 入口处理函数,把请求转交业务服务并把结果返回客户端",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/routes/orders.ts#ordersRouter.get:/:id",
+        "kind: handler"
+      ]
+    },
+    {
+      "nodeId": "n4",
+      "businessLabel": "getOrderDetail(函数)",
+      "confidence": "medium",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "kind: function"
+      ]
+    },
+    {
+      "nodeId": "n5",
+      "businessLabel": "读取订单表",
+      "businessDescription": "prisma.order.findFirst",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "src/services/order-service.ts:90",
+        "ormCall: prisma.order.findFirst"
+      ]
+    },
+    {
+      "nodeId": "n6",
+      "businessLabel": "订单表",
+      "businessDescription": "持久化表 Order,承载本链路数据读写",
+      "confidence": "high",
+      "evidence": [
+        "model: Order"
+      ]
+    },
+    {
+      "nodeId": "n7",
+      "businessLabel": "读取订单行表",
+      "businessDescription": "prisma.orderitem.findFirst",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "src/services/order-service.ts:90",
+        "ormCall: prisma.orderitem.findFirst"
+      ]
+    },
+    {
+      "nodeId": "n8",
+      "businessLabel": "订单行表",
+      "businessDescription": "持久化表 OrderItem,承载本链路数据读写",
+      "confidence": "high",
+      "evidence": [
+        "model: OrderItem"
+      ]
+    },
+    {
+      "nodeId": "n9",
+      "businessLabel": "读取商品表",
+      "businessDescription": "prisma.product.findFirst",
+      "confidence": "high",
+      "evidence": [
+        "symbolId: ts:src/services/order-service.ts#getOrderDetail",
+        "src/services/order-service.ts:90",
+        "ormCall: prisma.product.findFirst"
+      ]
+    },
+    {
+      "nodeId": "n10",
+      "businessLabel": "商品表",
+      "businessDescription": "持久化表 Product,承载本链路数据读写",
+      "confidence": "high",
+      "evidence": [
+        "model: Product"
+      ]
+    },
+    {
+      "nodeId": "n11",
+      "businessLabel": "返回响应",
+      "confidence": "high",
+      "evidence": [
+        "httpMethod: GET"
+      ]
+    }
+  ],
+  "edgeAnnotations": [
+    {
+      "edgeId": "e1",
+      "businessLabel": "占位:input-bind",
+      "confidence": "low",
+      "evidence": [
+        "(no evidence — placeholder, mock provider)"
+      ]
+    },
+    {
+      "edgeId": "e2",
+      "businessLabel": "占位:call",
+      "confidence": "low",
+      "evidence": [
+        "(no evidence — placeholder, mock provider)"
+      ]
+    },
+    {
+      "edgeId": "e3",
+      "businessLabel": "调用",
+      "confidence": "high",
+      "evidence": [
+        "src/routes/orders.ts:53"
+      ]
+    },
+    {
+      "edgeId": "e4",
+      "businessLabel": "调用",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:90"
+      ]
+    },
+    {
+      "edgeId": "e5",
+      "businessLabel": "读订单表",
+      "confidence": "high",
+      "evidence": [
+        "target: Order"
+      ]
+    },
+    {
+      "edgeId": "e6",
+      "businessLabel": "调用",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:90"
+      ]
+    },
+    {
+      "edgeId": "e7",
+      "businessLabel": "读订单行表",
+      "confidence": "high",
+      "evidence": [
+        "target: OrderItem"
+      ]
+    },
+    {
+      "edgeId": "e8",
+      "businessLabel": "调用",
+      "confidence": "high",
+      "evidence": [
+        "src/services/order-service.ts:90"
+      ]
+    },
+    {
+      "edgeId": "e9",
+      "businessLabel": "读商品表",
+      "confidence": "high",
+      "evidence": [
+        "target: Product"
+      ]
+    },
+    {
+      "edgeId": "e10",
+      "businessLabel": "占位:return",
+      "confidence": "low",
+      "evidence": [
+        "(no evidence — placeholder, mock provider)"
+      ]
+    }
+  ]
+}

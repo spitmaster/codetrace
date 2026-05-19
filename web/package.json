@@ -1,0 +1,26 @@
+{
+  "name": "@codeviz/web",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Codeviz M1 web frontend — 2D FlowGraph viewer. Loads the four JSON artefacts emitted by the CLI (SymbolGraph not strictly needed) and renders the entry → FlowGraph → BusinessAnnotations pipeline. M1 stays 2D per SPEC §UI; M2 layers 3D.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@xyflow/react": "^12.3.5",
+    "dagre": "^0.8.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/dagre": "^0.7.52",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  }
+}

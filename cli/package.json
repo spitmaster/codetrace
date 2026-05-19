@@ -15,6 +15,8 @@
     "analyze": "tsx src/index.ts analyze",
     "map-io": "tsx src/index.ts map-io",
     "trace": "tsx src/index.ts trace",
+    "translate": "tsx src/index.ts translate",
+    "e2e:m1": "tsx src/eval/e2e.ts",
     "validate:ground-truth": "tsx src/schemas/validate-ground-truth.ts"
   },
   "dependencies": {

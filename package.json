@@ -9,6 +9,11 @@
     "cli:test": "npm --prefix cli run test",
     "cli:analyze": "npm --prefix cli run analyze --",
     "cli:map-io": "npm --prefix cli run map-io --",
-    "cli:trace": "npm --prefix cli run trace --"
+    "cli:trace": "npm --prefix cli run trace --",
+    "cli:translate": "npm --prefix cli run translate --",
+    "e2e:m1": "npm --prefix cli run e2e:m1",
+    "web:install": "npm --prefix web install",
+    "web:dev": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build"
   }
 }

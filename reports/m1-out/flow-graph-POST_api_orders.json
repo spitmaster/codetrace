@@ -1,0 +1,343 @@
+{
+  "schemaVersion": "0.1.0",
+  "entryId": "io:http:POST:/api/orders",
+  "nodes": [
+    {
+      "id": "n1",
+      "kind": "input",
+      "label": "request",
+      "depth": 0,
+      "metadata": {
+        "headers": [
+          "x-user-id"
+        ]
+      }
+    },
+    {
+      "id": "n2",
+      "kind": "function",
+      "label": "requireUser",
+      "symbolId": "ts:src/lib/auth.ts#requireUser",
+      "depth": 1,
+      "metadata": {
+        "role": "middleware"
+      }
+    },
+    {
+      "id": "n3",
+      "kind": "function",
+      "label": "POST /api/orders handler",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "depth": 1,
+      "metadata": {
+        "kind": "handler"
+      }
+    },
+    {
+      "id": "n4",
+      "kind": "function",
+      "label": "createOrder",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 2,
+      "metadata": {
+        "kind": "function"
+      }
+    },
+    {
+      "id": "n5",
+      "kind": "function",
+      "label": "prisma.user.findUnique",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.user.findUnique",
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 33
+        },
+        "operation": "read"
+      }
+    },
+    {
+      "id": "n6",
+      "kind": "table",
+      "label": "User table",
+      "depth": 4,
+      "metadata": {
+        "model": "User"
+      }
+    },
+    {
+      "id": "n7",
+      "kind": "function",
+      "label": "prisma.order.create",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.order.create",
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 44
+        },
+        "operation": "write"
+      }
+    },
+    {
+      "id": "n8",
+      "kind": "table",
+      "label": "Order table",
+      "depth": 4,
+      "metadata": {
+        "model": "Order"
+      }
+    },
+    {
+      "id": "n9",
+      "kind": "function",
+      "label": "prisma.orderitem.createMany",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "depth": 3,
+      "metadata": {
+        "ormCall": "prisma.orderitem.createMany",
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 52
+        },
+        "operation": "write"
+      }
+    },
+    {
+      "id": "n10",
+      "kind": "table",
+      "label": "OrderItem table",
+      "depth": 4,
+      "metadata": {
+        "model": "OrderItem"
+      }
+    },
+    {
+      "id": "n11",
+      "kind": "function",
+      "label": "reserveStock",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "depth": 3,
+      "metadata": {
+        "kind": "function"
+      }
+    },
+    {
+      "id": "n12",
+      "kind": "function",
+      "label": "prisma.product.findUnique",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "depth": 4,
+      "metadata": {
+        "ormCall": "prisma.product.findUnique",
+        "site": {
+          "file": "src/services/inventory-service.ts",
+          "line": 46
+        },
+        "operation": "read"
+      }
+    },
+    {
+      "id": "n13",
+      "kind": "table",
+      "label": "Product table",
+      "depth": 5,
+      "metadata": {
+        "model": "Product"
+      }
+    },
+    {
+      "id": "n14",
+      "kind": "function",
+      "label": "prisma.product.update",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "depth": 4,
+      "metadata": {
+        "ormCall": "prisma.product.update",
+        "site": {
+          "file": "src/services/inventory-service.ts",
+          "line": 56
+        },
+        "operation": "write"
+      }
+    },
+    {
+      "id": "n15",
+      "kind": "response",
+      "label": "201 created",
+      "depth": 2,
+      "metadata": {
+        "httpMethod": "POST"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "from": "n1",
+      "to": "n2",
+      "kind": "input-bind",
+      "confidence": "high"
+    },
+    {
+      "id": "e2",
+      "from": "n2",
+      "to": "n3",
+      "kind": "call",
+      "confidence": "high"
+    },
+    {
+      "id": "e3",
+      "from": "n3",
+      "to": "n4",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/routes/orders.ts",
+          "line": 20
+        }
+      }
+    },
+    {
+      "id": "e4",
+      "from": "n4",
+      "to": "n5",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 33
+        }
+      }
+    },
+    {
+      "id": "e5",
+      "from": "n5",
+      "to": "n6",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "User"
+      }
+    },
+    {
+      "id": "e6",
+      "from": "n4",
+      "to": "n7",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 44
+        }
+      }
+    },
+    {
+      "id": "e7",
+      "from": "n7",
+      "to": "n8",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": {
+        "target": "Order"
+      }
+    },
+    {
+      "id": "e8",
+      "from": "n4",
+      "to": "n9",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 52
+        }
+      }
+    },
+    {
+      "id": "e9",
+      "from": "n9",
+      "to": "n10",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": {
+        "target": "OrderItem"
+      }
+    },
+    {
+      "id": "e10",
+      "from": "n4",
+      "to": "n11",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/order-service.ts",
+          "line": 38
+        }
+      }
+    },
+    {
+      "id": "e11",
+      "from": "n11",
+      "to": "n12",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/inventory-service.ts",
+          "line": 46
+        }
+      }
+    },
+    {
+      "id": "e12",
+      "from": "n12",
+      "to": "n13",
+      "kind": "read",
+      "confidence": "high",
+      "metadata": {
+        "target": "Product"
+      }
+    },
+    {
+      "id": "e13",
+      "from": "n11",
+      "to": "n14",
+      "kind": "call",
+      "confidence": "high",
+      "metadata": {
+        "site": {
+          "file": "src/services/inventory-service.ts",
+          "line": 56
+        }
+      }
+    },
+    {
+      "id": "e14",
+      "from": "n14",
+      "to": "n13",
+      "kind": "write",
+      "confidence": "high",
+      "metadata": {
+        "target": "Product"
+      }
+    },
+    {
+      "id": "e15",
+      "from": "n3",
+      "to": "n15",
+      "kind": "return",
+      "confidence": "high"
+    }
+  ],
+  "cycles": [],
+  "truncations": []
+}

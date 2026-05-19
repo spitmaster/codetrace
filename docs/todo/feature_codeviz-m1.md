@@ -1,79 +1,84 @@
-# Todo — feature/codeviz-m1 (当前: M1.2 静态分析 + IO 入口识别)
+# Todo — feature/codeviz-m1 (M1 全部子里程碑 MVP 已就位,待用户签收)
 
-> 服务于 [milestones/feature_codeviz-m1.md → M1.2](../milestones/feature_codeviz-m1.md) 的可勾选清单。
-> **M1.2 完结后,本文件整段清空,重写为 M1.3 内容** (按全局 `~/.claude/CLAUDE.md` §2.2)。
-> 真相源: [SPEC.md](../../SPEC.md), [agents/codeviz-overview.md](../agents/codeviz-overview.md), [agents/static-code-analyzer.md](../agents/static-code-analyzer.md), [agents/io-entry-mapper.md](../agents/io-entry-mapper.md)
+> 服务于 [milestones/feature_codeviz-m1.md](../milestones/feature_codeviz-m1.md) 的可勾选清单。
+> 上一个 M(M1.5)完结后按 `~/.claude/CLAUDE.md` §2.2 清空,此处为 M1 整体收尾视图。
+> 真相源: [SPEC.md](../../SPEC.md), [agents/codeviz-overview.md](../agents/codeviz-overview.md), [reports/m1-accuracy.md](../../reports/m1-accuracy.md)
 
 ---
 
-## M1.2: 静态分析 + IO 入口识别
+## M1 收尾 — 待签收事项
 
 ### 上下文
 
-**M1.1 已完结**:Fixture-A 后端 + 前端骨架 + 10 份 ground-truth(symbol/io + 4×flow + 4×business)全部就位,`npm run fixture:health` 9/9 通过,`npm run validate:ground-truth` 10/10 通过。
+**截至 2026-05-19**:M1.1 – M1.5 全部 MVP 就位。
 
-**M1.2 要做的事**:
-- **static-code-analyzer**:对 fixture-A `backend/src/**/*.ts` 跑静态分析,产出符合 `cli/src/schemas/symbol-graph.ts` schema 的 SymbolGraph,与 ground-truth 比对召回 ≥ 80%。
-- **io-entry-mapper**:基于 SymbolGraph + 直接扫源码,产出 IOEntryRegistry,与 ground-truth 比对**准确率 100%**(per SPEC §7)。
+| 子里程碑 | 状态 | 关键证据 |
+|---|---|---|
+| M1.1 测试夹具 | ✅ 完结 | `fixtures/fixture-a-order-app/*`, `npm run fixture:health` 9/9, `validate:ground-truth` 10/10 |
+| M1.2 静态分析 + IO 入口 | ✅ MVP | `cli/src/analyzer + io-mapper`, vitest 12/12, SymbolGraph 召回 100%, IO 100% |
+| M1.3 数据流追踪 | ✅ MVP | `cli/src/tracer`, vitest 16/16, FlowGraph nodeCoverage 100%/edgeCoverage 91% |
+| M1.4 业务翻译 + Provider | ✅ MVP | `cli/src/translator` 3 providers + prompt 模板, vitest 12/12, mock evidence 非空 100% |
+| M1.5 2D 前端 + e2e | ✅ MVP | `web/` 三栏视图, `cli/src/eval/`, `npm run e2e:m1`, `reports/m1-accuracy.md` |
 
-**红线提醒**:
-- M1.2 只支持 **TS + Express + Prisma**(red line #4),其它一律不分析。
-- 中间表示必须带 `schemaVersion: "0.1.0"`(red line #6)。
-- 目标项目源码只读(red line #5),analyzer 只读 `fixtures/fixture-a-order-app/backend/`,不修改。
-- Symbol ID 严格按 `ts:src/path.ts#qualifiedName` 格式。
+### 待人工最终签收(M1 退出条件最后一公里)
 
-### 任务清单
+- [ ] **T-FINAL-1** 用户审阅本轮所有改动并 commit + push(本会话不动 git,按红线 #10 等用户拍板)
+- [ ] **T-FINAL-2** 实跑一次 `npm run e2e:m1 -- --provider claude`(需 `ANTHROPIC_API_KEY`)— 验证 BusinessAnnotations labelMatchRate ≥ 80% 达到 SPEC §7 第 4 条要求(mock 当前 44%,真实 LLM 预期 ≥ 80%)
+- [ ] **T-FINAL-3** 同步两份文档:
+  - [ ] `docs/agents/codeviz-overview.md` 支持矩阵把 TS+Express+Prisma 行从 ⏳ 改 ✅
+  - [ ] `docs/roadmap.md` M1 行从 🚧 改 ✅,版本号迁入"已发布版本"
+- [ ] **T-FINAL-4** 把 `docs/milestones/feature_codeviz-m1.md` `git mv` 到 `docs/milestones/archive/`(按全局 §3.2 完工归档)+ 主索引 `docs/milestones.md` 进行中行剪到已归档区
+- [ ] **T-FINAL-5** 本 todo 文件 `git rm`(M 完结清空原则)
+- [ ] **T-FINAL-6** 合并 `feature/codeviz-m1` → `main`(用户授权后)
 
-#### 阶段 A — Analyzer 核心(static-code-analyzer)
+### 自动准确率数据(2026-05-19 mock provider)
 
-- [x] **T21** 在 `cli/src/analyzer/` 建目录,引入 `ts-morph`(2026-05-18)
-- [x] **T22** 实现 `analyzeProject(projectRoot) => SymbolGraph`:`<root>/src/**/*.ts`,跳过 node_modules/dist/prisma
-- [x] **T23** 抽取 symbols:function/method/class/variable/handler(`ts:<rel>#<qn>`)
-- [x] **T24** 抽取 calls:direct + framework-injected(中间件 → handler)
-- [x] **T25** 抽取 frameworkPoints:route-registration / router-mount / middleware-mount / middleware-definition
-- [x] **T26** 抽取 dataAccessPoints:`prisma.X.Y` 与 `tx.X.Y`,op 分类 read/write/delete + **`include` 关系展开为额外 read**(bonus,M1.3 trace 用得到)
-- [x] **T27** CLI 入口 `cli/src/index.ts`:`analyze <root> [--output <file>]` 子命令
-- [x] **T28** 单测(vitest):7 个 assertions — schema 版本、framework 识别、symbol 召回 100%(19/19)、call 召回 100%(10/10)、dataAccessPoint 全覆盖、route-registration 4/4、router-mount/middleware-definition
+来自 `reports/m1-accuracy.md`:
 
-#### 阶段 B — IO Entry Mapper(io-entry-mapper)
+| 验收项 | 阈值 | 实际 | 结果 |
+|---|---|---|---|
+| SymbolGraph 召回 | ≥ 80% | 100.0% | PASS |
+| IOEntryRegistry 准确 | = 100% | 100.0% | PASS |
+| FlowGraph 主路径(4 entries 平均 nodeCoverage) | ≥ 80% | 100.0% | PASS |
+| FlowGraph 主路径(4 entries 平均 edgeCoverage) | ≥ 80% | 91.0% | PASS |
+| BusinessAnnotations(mock 规则引擎,非 LLM) | ≥ 80% | 44.0% | MISS(预期 — 等 ClaudeProvider 实跑) |
+| BusinessAnnotations evidenceNonEmpty(红线 #2) | = 100% | 100.0% | PASS |
 
-- [x] **T29** 在 `cli/src/io-mapper/` 实现 `mapEntries({projectRoot}) => IOEntryRegistry`
-- [x] **T30** 入口识别:Router 变量扫描 + app.use mount 拼接 + app.get/post 直挂(`/health`)
-- [x] **T31** entry id 格式 `io:http:<METHOD>:<fullPath>`,与 ground-truth 完全一致
-- [x] **T32** middlewareSymbolIds:解析 `router.X(path, ...mw, handler)` 中的 Identifier 中间件,通过 import 关系拼到对应 symbol id
-- [x] **T33** CLI 子命令 `map-io <root>`
-- [x] **T34** 单测(vitest):5 个 assertions — entry 数 = 5、id/displayName/handlerSymbolId 逐字段一致、middlewareSymbolIds 一致、所有 confidence=high(准确率 100%,SPEC §7)
+**整体三项 hard requirement(SymbolGraph / IO / FlowGraph)**: PASS
 
-#### 阶段 C — 工程基建
+### 红线遵守自检
 
-- [x] **T35** 仓库根 `package.json` 增 `cli:test` / `cli:analyze` / `cli:map-io` / `cli:trace` scripts
-- [x] **T36** `cli/package.json` 添加 ts-morph + vitest 依赖;CLI 解析自己写小手卷(暂不引 commander 减少依赖)
-- [x] **T37** README:`cli/README.md` 说明 3 个子命令 + schema 版本与边界
-
-### M1.2 验收
-
-- [x] 全部 T21 – T37 勾选(2026-05-18)
-- [x] `npm run cli:test` 全部通过(28/28 — 含 M1.3 tracer 16 项)
-- [x] `npm run cli:analyze -- fixtures/fixture-a-order-app/backend` 产出的 SymbolGraph 通过 `SymbolGraphSchema.parse`
-- [x] SymbolGraph 召回 100%(19/19 期望符号 + 2 个 server.ts 额外项,实际 ⊇ 期望)
-- [x] `npm run cli:map-io -- fixtures/fixture-a-order-app/backend` 产出的 IOEntryRegistry 与 ground-truth 完全一致(准确率 100%)
-- [ ] codeviz-orchestrator 审阅通过(契约对齐 + 红线无违反)— 待用户最终签收 commit + push
-
-### M1.2 完结操作
-
-完结时按 `~/.claude/CLAUDE.md` §2.2:
-
-1. **本文件整段清空**,重写为 M1.3 内容(数据流追踪 dataflow-tracer 的可勾选清单)
-2. 在 [milestones/feature_codeviz-m1.md 子里程碑表](../milestones/feature_codeviz-m1.md#子里程碑) 把 M1.2 行从 ⏳ 改 ✅,加 commit 哈希 + 日期
-3. 启动 M1.3 — 由 codeviz-orchestrator 调度 dataflow-tracer
+- [x] **目标项目源码只读**(red line #5) — 本轮全过程 `fixtures/fixture-a-order-app/` 下未修改任何文件
+- [x] **支持的语言/框架显式声明**(red line #4) — 仅 TS+Express+Prisma;`analyze`/`map-io`/`trace` 遇到其他 stack 报错或跳过
+- [x] **中间表示 schema 版本号**(red line #6) — 所有产出 JSON `schemaVersion: "0.1.0"`
+- [x] **业务翻译禁止臆造**(red line #2) — mock + claude + ollama 三个 Provider 均强制 evidence 非空,空 evidence 强制 confidence=low + 占位 label
+- [x] **3D 不是包装 2D**(red line #3) — M1 阶段 web 严格 2D(React Flow + dagre),3D 留待 M2
+- [x] **后端 agent 不直接生成可视化代码**(red line #1) — CLI 仅产 JSON,web 独立读 JSON
 
 ---
 
-## 不在 M1.2 范围 (避免范围蔓延)
+## 不在 M1 范围 (避免范围蔓延)
 
-- ❌ FlowGraph 追踪(M1.3)
-- ❌ LLM 翻译(M1.4)
-- ❌ 浏览器前端(M1.5)
-- ❌ Java / Vue / Python 等其他语言/框架(M2+)
-- ❌ NestJS 装饰器路由(SPEC §M1 功能 1 说 "Express 或 NestJS 二选一",M1.2 选 Express)
-- ❌ tree-sitter(SPEC 提到 tree-sitter,M1.2 实际选 ts-morph/typescript;tree-sitter 留给 M2 Java/Vue 扩展)
+按 SPEC §M2 / §M3 / `docs/agents/codeviz-overview.md` 阶段 3,以下推到 M2+:
+
+- ❌ Java Spring / Vue3 SFC 支持(M2 用户最优先需求)
+- ❌ NestJS @Controller 装饰器(SPEC §M1 选 Express)
+- ❌ Python FastAPI(M3)
+- ❌ 3D 渲染 + 防迷路交互全套(M2)
+- ❌ 前端按钮 / Router 入口识别(M2)
+- ❌ tree-sitter(M2 跨语言时引入,M1 用 ts-morph 足够)
+- ❌ 大型项目分块 / LOD(M3)
+- ❌ 静态发布 `codeviz view` 打包(M3)
+- ❌ 缓存策略 + LLM token 预算监控(M2 真实 LLM 稳定使用时再做)
+
+---
+
+## 下一个 M 启动指引
+
+当 M1 退出后,新建 `docs/milestones/feature_codeviz-m2.md` 并按 `~/.claude/CLAUDE.md` §2.2 把新 M 的子里程碑拆成 T 序列写入新建的 `docs/todo/feature_codeviz-m2.md`。M2 候选优先级(待与用户对齐):
+
+1. Fixture-B(Spring + Vue3 最小订单系统)
+2. static-code-analyzer 扩展 Java + Vue3 SFC
+3. io-entry-mapper 扩展 Vue3 onClick + 前端 Router 入口
+4. 3D 渲染 + 防迷路交互(`@react-three/fiber`)
+5. 用户修正反馈机制(business-translator 学习用户改 label)

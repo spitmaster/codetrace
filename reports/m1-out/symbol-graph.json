@@ -1,0 +1,711 @@
+{
+  "schemaVersion": "0.1.0",
+  "rootPath": "../fixtures/fixture-a-order-app/backend",
+  "languages": [
+    "typescript"
+  ],
+  "frameworks": [
+    {
+      "name": "express",
+      "version": "4.x",
+      "confidence": "high"
+    },
+    {
+      "name": "prisma",
+      "version": "5.x",
+      "confidence": "high"
+    }
+  ],
+  "symbols": [
+    {
+      "id": "ts:src/app.ts#createApp",
+      "kind": "function",
+      "name": "createApp",
+      "qualifiedName": "createApp",
+      "filePath": "src/app.ts",
+      "range": {
+        "startLine": 5,
+        "endLine": 33
+      },
+      "signature": "typeof createApp",
+      "visibility": "public",
+      "tags": []
+    },
+    {
+      "id": "ts:src/server.ts#port",
+      "kind": "variable",
+      "name": "port",
+      "qualifiedName": "port",
+      "filePath": "src/server.ts",
+      "range": {
+        "startLine": 3,
+        "endLine": 3
+      },
+      "signature": "number",
+      "visibility": "internal",
+      "tags": []
+    },
+    {
+      "id": "ts:src/server.ts#app",
+      "kind": "variable",
+      "name": "app",
+      "qualifiedName": "app",
+      "filePath": "src/server.ts",
+      "range": {
+        "startLine": 4,
+        "endLine": 4
+      },
+      "signature": "any",
+      "visibility": "internal",
+      "tags": []
+    },
+    {
+      "id": "ts:src/lib/auth.ts#requireUser",
+      "kind": "function",
+      "name": "requireUser",
+      "qualifiedName": "requireUser",
+      "filePath": "src/lib/auth.ts",
+      "range": {
+        "startLine": 17,
+        "endLine": 24
+      },
+      "signature": "typeof requireUser",
+      "visibility": "public",
+      "tags": [
+        "middleware",
+        "auth",
+        "lib"
+      ]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#HttpError",
+      "kind": "class",
+      "name": "HttpError",
+      "qualifiedName": "HttpError",
+      "filePath": "src/lib/errors.ts",
+      "range": {
+        "startLine": 1,
+        "endLine": 6
+      },
+      "visibility": "public",
+      "tags": [
+        "error",
+        "error-base"
+      ]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#ValidationError",
+      "kind": "class",
+      "name": "ValidationError",
+      "qualifiedName": "ValidationError",
+      "filePath": "src/lib/errors.ts",
+      "range": {
+        "startLine": 8,
+        "endLine": 12
+      },
+      "visibility": "public",
+      "tags": [
+        "error"
+      ]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#UnauthorizedError",
+      "kind": "class",
+      "name": "UnauthorizedError",
+      "qualifiedName": "UnauthorizedError",
+      "filePath": "src/lib/errors.ts",
+      "range": {
+        "startLine": 14,
+        "endLine": 18
+      },
+      "visibility": "public",
+      "tags": [
+        "error"
+      ]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#NotFoundError",
+      "kind": "class",
+      "name": "NotFoundError",
+      "qualifiedName": "NotFoundError",
+      "filePath": "src/lib/errors.ts",
+      "range": {
+        "startLine": 20,
+        "endLine": 24
+      },
+      "visibility": "public",
+      "tags": [
+        "error"
+      ]
+    },
+    {
+      "id": "ts:src/lib/errors.ts#ConflictError",
+      "kind": "class",
+      "name": "ConflictError",
+      "qualifiedName": "ConflictError",
+      "filePath": "src/lib/errors.ts",
+      "range": {
+        "startLine": 26,
+        "endLine": 30
+      },
+      "visibility": "public",
+      "tags": [
+        "error"
+      ]
+    },
+    {
+      "id": "ts:src/lib/prisma.ts#prisma",
+      "kind": "variable",
+      "name": "prisma",
+      "qualifiedName": "prisma",
+      "filePath": "src/lib/prisma.ts",
+      "range": {
+        "startLine": 3,
+        "endLine": 3
+      },
+      "signature": "any",
+      "visibility": "public",
+      "tags": [
+        "singleton",
+        "orm-client"
+      ]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter",
+      "kind": "variable",
+      "name": "ordersRouter",
+      "qualifiedName": "ordersRouter",
+      "filePath": "src/routes/orders.ts",
+      "range": {
+        "startLine": 10,
+        "endLine": 10
+      },
+      "signature": "any",
+      "visibility": "public",
+      "tags": [
+        "router"
+      ]
+    },
+    {
+      "id": "ts:src/services/inventory-service.ts#reserveStock",
+      "kind": "function",
+      "name": "reserveStock",
+      "qualifiedName": "reserveStock",
+      "filePath": "src/services/inventory-service.ts",
+      "range": {
+        "startLine": 26,
+        "endLine": 69
+      },
+      "signature": "typeof reserveStock",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "service"
+      ]
+    },
+    {
+      "id": "ts:src/services/inventory-service.ts#restoreStock",
+      "kind": "function",
+      "name": "restoreStock",
+      "qualifiedName": "restoreStock",
+      "filePath": "src/services/inventory-service.ts",
+      "range": {
+        "startLine": 74,
+        "endLine": 84
+      },
+      "signature": "typeof restoreStock",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "service"
+      ]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#createOrder",
+      "kind": "function",
+      "name": "createOrder",
+      "qualifiedName": "createOrder",
+      "filePath": "src/services/order-service.ts",
+      "range": {
+        "startLine": 24,
+        "endLine": 63
+      },
+      "signature": "typeof createOrder",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "service"
+      ]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#listOrders",
+      "kind": "function",
+      "name": "listOrders",
+      "qualifiedName": "listOrders",
+      "filePath": "src/services/order-service.ts",
+      "range": {
+        "startLine": 68,
+        "endLine": 84
+      },
+      "signature": "typeof listOrders",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "service"
+      ]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#getOrderDetail",
+      "kind": "function",
+      "name": "getOrderDetail",
+      "qualifiedName": "getOrderDetail",
+      "filePath": "src/services/order-service.ts",
+      "range": {
+        "startLine": 89,
+        "endLine": 105
+      },
+      "signature": "typeof getOrderDetail",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "service"
+      ]
+    },
+    {
+      "id": "ts:src/services/order-service.ts#cancelOrder",
+      "kind": "function",
+      "name": "cancelOrder",
+      "qualifiedName": "cancelOrder",
+      "filePath": "src/services/order-service.ts",
+      "range": {
+        "startLine": 111,
+        "endLine": 137
+      },
+      "signature": "typeof cancelOrder",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "service"
+      ]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "kind": "handler",
+      "name": "POST /",
+      "qualifiedName": "ordersRouter.post(\"/\")",
+      "filePath": "src/routes/orders.ts",
+      "range": {
+        "startLine": 15,
+        "endLine": 29
+      },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "http-handler"
+      ]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "kind": "handler",
+      "name": "GET /",
+      "qualifiedName": "ordersRouter.get(\"/\")",
+      "filePath": "src/routes/orders.ts",
+      "range": {
+        "startLine": 32,
+        "endLine": 45
+      },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "http-handler"
+      ]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "kind": "handler",
+      "name": "GET /:id",
+      "qualifiedName": "ordersRouter.get(\"/:id\")",
+      "filePath": "src/routes/orders.ts",
+      "range": {
+        "startLine": 48,
+        "endLine": 59
+      },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "http-handler"
+      ]
+    },
+    {
+      "id": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "kind": "handler",
+      "name": "DELETE /:id",
+      "qualifiedName": "ordersRouter.delete(\"/:id\")",
+      "filePath": "src/routes/orders.ts",
+      "range": {
+        "startLine": 62,
+        "endLine": 73
+      },
+      "signature": "(req, res, next) => Promise<void>",
+      "visibility": "public",
+      "tags": [
+        "async",
+        "http-handler"
+      ]
+    }
+  ],
+  "calls": [
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 17
+      },
+      "confidence": "high",
+      "note": "middleware composition: middleware is registered before the handler"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 34
+      },
+      "confidence": "high",
+      "note": "middleware composition: middleware is registered before the handler"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 50
+      },
+      "confidence": "high",
+      "note": "middleware composition: middleware is registered before the handler"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "calleeId": "ts:src/lib/auth.ts#requireUser",
+      "callKind": "framework-injected",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 64
+      },
+      "confidence": "high",
+      "note": "middleware composition: middleware is registered before the handler"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "calleeId": "ts:src/services/order-service.ts#createOrder",
+      "callKind": "direct",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 20
+      },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "calleeId": "ts:src/services/order-service.ts#listOrders",
+      "callKind": "direct",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 39
+      },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "calleeId": "ts:src/services/order-service.ts#getOrderDetail",
+      "callKind": "direct",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 53
+      },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "calleeId": "ts:src/services/order-service.ts#cancelOrder",
+      "callKind": "direct",
+      "fileLocation": {
+        "file": "src/routes/orders.ts",
+        "line": 67
+      },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/services/order-service.ts#createOrder",
+      "calleeId": "ts:src/services/inventory-service.ts#reserveStock",
+      "callKind": "direct",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 38
+      },
+      "confidence": "high"
+    },
+    {
+      "callerId": "ts:src/services/order-service.ts#cancelOrder",
+      "calleeId": "ts:src/services/inventory-service.ts#restoreStock",
+      "callKind": "direct",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 126
+      },
+      "confidence": "high"
+    }
+  ],
+  "frameworkPoints": [
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.post( \"/\", requireUser, async (req: Request, res: Response, next: NextFunction) => { try { const result = await createOrder({ ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.get( \"/\", requireUser, async (req: Request, res: Response, next: NextFunction) => { try { ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.get( \"/:id\", requireUser, async (req: Request, res: Response, next: NextFunction) => { try { ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "meaning": "route-registration",
+      "raw": "ordersRouter.delete( \"/:id\", requireUser, async (req: Request, res: Response, next: NextFunction) => { try { ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "middleware-mount",
+      "raw": "app.use(express.json())"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "route-registration",
+      "raw": "app.get(\"/health\", (_req, res) => { res.json({ status: \"ok\" }); })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "router-mount",
+      "raw": "app.use(\"/api/orders\", ordersRouter)"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "middleware-mount",
+      "raw": "app.use((req: Request, res: Response) => { res.status(404).json({ code: \"NOT_FOUND\", message: `no route for ${req.method} ${req.path}` }); }"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/app.ts#createApp",
+      "meaning": "middleware-mount",
+      "raw": "app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => { if (err instanceof HttpError) { res.status(err.status).json({ ... })"
+    },
+    {
+      "kind": "convention",
+      "framework": "express",
+      "symbolId": "ts:src/lib/auth.ts#requireUser",
+      "meaning": "middleware-definition",
+      "raw": "function requireUser(req, _res, next) { ... }"
+    }
+  ],
+  "dataAccessPoints": [
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "target": "Product",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/inventory-service.ts",
+        "line": 46
+      },
+      "raw": "tx.product.findUnique({ where: { id: item.productId } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/inventory-service.ts#reserveStock",
+      "target": "Product",
+      "operation": "write",
+      "fileLocation": {
+        "file": "src/services/inventory-service.ts",
+        "line": 56
+      },
+      "raw": "tx.product.update({ where: { id: product.id }, data: { stock: { decrement: item.quantity } }, })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/inventory-service.ts#restoreStock",
+      "target": "Product",
+      "operation": "write",
+      "fileLocation": {
+        "file": "src/services/inventory-service.ts",
+        "line": 79
+      },
+      "raw": "tx.product.update({ where: { id: item.productId }, data: { stock: { increment: item.quantity } }, })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "target": "User",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 33
+      },
+      "raw": "tx.user.findUnique({ where: { id: input.userId } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "target": "Order",
+      "operation": "write",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 44
+      },
+      "raw": "tx.order.create({ data: { userId: input.userId, status: \"pending\", totalAmount, }, })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#createOrder",
+      "target": "OrderItem",
+      "operation": "write",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 52
+      },
+      "raw": "tx.orderItem.createMany({ data: reserved.map((line) => ({ orderId: order.id, productId: line.productId, quantity: line.quantity, unitPrice: line.unitPrice, })),",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#listOrders",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 74
+      },
+      "raw": "prisma.order.findMany({ where: { userId: opts.userId }, orderBy: { createdAt: \"desc\" }, skip, take: pageSize, })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#listOrders",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 80
+      },
+      "raw": "prisma.order.count({ where: { userId: opts.userId } })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#getOrderDetail",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 90
+      },
+      "raw": "prisma.order.findFirst({ where: { id: orderId, userId }, include: { items: { include: { product: { select: { id: true, name: true, price: true } }, }, }, }, })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#getOrderDetail",
+      "target": "OrderItem",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 90
+      },
+      "raw": "prisma.order.findFirst({ where: { id: orderId, userId }, include: { items: { include: { product: { select: { id: true, name: true, price: true } }, }, }, }, })",
+      "confidence": "medium",
+      "note": "relation expansion via include from Order"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#getOrderDetail",
+      "target": "Product",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 90
+      },
+      "raw": "prisma.order.findFirst({ where: { id: orderId, userId }, include: { items: { include: { product: { select: { id: true, name: true, price: true } }, }, }, }, })",
+      "confidence": "medium",
+      "note": "relation expansion via include from Order"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "target": "Order",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 113
+      },
+      "raw": "tx.order.findFirst({ where: { id: orderId, userId }, include: { items: true }, })",
+      "confidence": "high"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "target": "OrderItem",
+      "operation": "read",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 113
+      },
+      "raw": "tx.order.findFirst({ where: { id: orderId, userId }, include: { items: true }, })",
+      "confidence": "medium",
+      "note": "relation expansion via include from Order"
+    },
+    {
+      "kind": "orm-call",
+      "symbolId": "ts:src/services/order-service.ts#cancelOrder",
+      "target": "Order",
+      "operation": "write",
+      "fileLocation": {
+        "file": "src/services/order-service.ts",
+        "line": 131
+      },
+      "raw": "tx.order.update({ where: { id: order.id }, data: { status: \"cancelled\" }, })",
+      "confidence": "high"
+    }
+  ]
+}

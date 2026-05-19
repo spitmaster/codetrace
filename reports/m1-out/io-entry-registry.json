@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "0.1.0",
+  "entries": [
+    {
+      "id": "io:http:GET:/health",
+      "kind": "http",
+      "displayName": "GET /health",
+      "framework": "express",
+      "handlerSymbolId": "ts:src/app.ts#createApp",
+      "metadata": {
+        "httpMethod": "GET",
+        "path": "/health",
+        "auth": "none",
+        "registeredAt": {
+          "file": "src/app.ts",
+          "line": 9
+        }
+      },
+      "group": "运维",
+      "businessLabel": "健康检查",
+      "confidence": "high"
+    },
+    {
+      "id": "io:http:POST:/api/orders",
+      "kind": "http",
+      "displayName": "POST /api/orders",
+      "framework": "express",
+      "handlerSymbolId": "ts:src/routes/orders.ts#ordersRouter.post:/",
+      "middlewareSymbolIds": [
+        "ts:src/lib/auth.ts#requireUser"
+      ],
+      "metadata": {
+        "httpMethod": "POST",
+        "path": "/api/orders",
+        "mountedAt": "/api/orders (via app.use in src/app.ts:13) + \"/\" on ordersRouter (src/routes/orders.ts:15)",
+        "auth": "x-user-id header (requireUser middleware)",
+        "registeredAt": {
+          "file": "src/routes/orders.ts",
+          "line": 15
+        }
+      },
+      "group": "订单",
+      "businessLabel": "下单",
+      "confidence": "high"
+    },
+    {
+      "id": "io:http:GET:/api/orders",
+      "kind": "http",
+      "displayName": "GET /api/orders",
+      "framework": "express",
+      "handlerSymbolId": "ts:src/routes/orders.ts#ordersRouter.get:/",
+      "middlewareSymbolIds": [
+        "ts:src/lib/auth.ts#requireUser"
+      ],
+      "metadata": {
+        "httpMethod": "GET",
+        "path": "/api/orders",
+        "mountedAt": "/api/orders (via app.use in src/app.ts:13) + \"/\" on ordersRouter (src/routes/orders.ts:32)",
+        "auth": "x-user-id header (requireUser middleware)",
+        "registeredAt": {
+          "file": "src/routes/orders.ts",
+          "line": 32
+        }
+      },
+      "group": "订单",
+      "businessLabel": "查看我的订单列表",
+      "confidence": "high"
+    },
+    {
+      "id": "io:http:GET:/api/orders/:id",
+      "kind": "http",
+      "displayName": "GET /api/orders/:id",
+      "framework": "express",
+      "handlerSymbolId": "ts:src/routes/orders.ts#ordersRouter.get:/:id",
+      "middlewareSymbolIds": [
+        "ts:src/lib/auth.ts#requireUser"
+      ],
+      "metadata": {
+        "httpMethod": "GET",
+        "path": "/api/orders/:id",
+        "mountedAt": "/api/orders (via app.use in src/app.ts:13) + \"/:id\" on ordersRouter (src/routes/orders.ts:48)",
+        "auth": "x-user-id header (requireUser middleware)",
+        "registeredAt": {
+          "file": "src/routes/orders.ts",
+          "line": 48
+        },
+        "pathParams": [
+          "id"
+        ]
+      },
+      "group": "订单",
+      "businessLabel": "查看订单详情",
+      "confidence": "high"
+    },
+    {
+      "id": "io:http:DELETE:/api/orders/:id",
+      "kind": "http",
+      "displayName": "DELETE /api/orders/:id",
+      "framework": "express",
+      "handlerSymbolId": "ts:src/routes/orders.ts#ordersRouter.delete:/:id",
+      "middlewareSymbolIds": [
+        "ts:src/lib/auth.ts#requireUser"
+      ],
+      "metadata": {
+        "httpMethod": "DELETE",
+        "path": "/api/orders/:id",
+        "mountedAt": "/api/orders (via app.use in src/app.ts:13) + \"/:id\" on ordersRouter (src/routes/orders.ts:62)",
+        "auth": "x-user-id header (requireUser middleware)",
+        "registeredAt": {
+          "file": "src/routes/orders.ts",
+          "line": 62
+        },
+        "pathParams": [
+          "id"
+        ]
+      },
+      "group": "订单",
+      "businessLabel": "取消订单",
+      "confidence": "high"
+    }
+  ]
+}

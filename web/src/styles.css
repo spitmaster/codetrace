@@ -1,0 +1,38 @@
+/* Minimal reset and base styles for codeviz M1 web frontend.
+   We intentionally avoid pulling Tailwind for M1 — the surface is small (~300
+   lines of JSX) and inline styles already track SPEC §4 visual specs. M2
+   (3D + larger component set) is a better fit for Tailwind. */
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    "PingFang SC",
+    "Hiragino Sans GB",
+    sans-serif;
+  color: #0f172a;
+}
+button {
+  font-family: inherit;
+}
+code,
+pre {
+  font-family:
+    ui-monospace,
+    "SFMono-Regular",
+    Menlo,
+    Consolas,
+    monospace;
+}
+
+/* React Flow tweaks */
+.react-flow__attribution {
+  display: none;
+}
